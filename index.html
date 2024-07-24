@@ -1,191 +1,160 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
-
     <meta charset="utf-8">
+    
+    <!--
+    <meta name="description" content="Description">
+    <meta name="author" content="Author">
+    -->
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-
+    
+    <script>
+    function PlayMusic() {
+        let audio = document.getElementsByTagName("audio")[0];
+        audio.play();
+    }
+    addEventListener("load", (event) => {
+        setTimeout(PlayMusic, 3000);
+    });
+    </script>
+    
     <style>
-
-
-        .container {
-        position: relative;
-        text-align: center;
-        color: rgb(255, 0, 0);
-        width: 40%;
-        padding-left: 30%;
-        font-family: ;
-        }
-
-
+        /*.container {
+            position: relative;
+            text-align: center;
+            color: rgb(255, 0, 0);
+            width: 40%;
+            padding-left: 30%;
+            font-family: ;
+        }*/
         
-
-
-
-        body{
+        body {
             background-image: url(images/1971772_c37cc.gif);
             background-repeat: repeat;
             background-attachment: fixed
         }
-
-
-       
-        .btn-group{
+        
+        .btn-group {
             text-align: center;
         }
 
-        #animeGirl
-        {
+        #animeGirl {
             display: block;
-        margin-left: auto;
-        margin-right: auto;
-        width: 25%;           
-        }
-        #red
-        {
-            color : red;
+            margin-left: auto;
+            margin-right: auto;
+            width: 25%;           
         }
 
-        #headLiner 
-        {
-            display: inline-block;
+        #headLiner {
+            display: block;
             margin-left: auto;
             margin-right: auto;
             width: 50%;
         }
-
-
-
+        
+        .img-container {
+            display: table;
+            table-layout: fixed;
+            width: 100%;
+        }
+        .side-img {
+            width:25%;
+            aspect-ratio: 1;
+        }
 
         .center {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: 35%;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 35%;
+        }
+        
+        @media only screen and (max-aspect-ratio: 4/3) {
+            #headLiner {
+                width: 80%;
+            }
+            #animeGirl {
+                width: 50%;
+            }
+            .side-img {
+                width: 45%;
+            }
+            .center {
+                width: 100%;
+            }
+        }
     </style>
-    
-    
 
+    <link rel="icon" type="image/x-icon" href="images/Untitled-1.png">
+    <title>PAINT CITY</title>
 </head>
-
-<title>PAINT CITY</title>
-<link rel="icon" type="image/x-icon" href="images/Untitled-1.png">
 <body>
+    <div class="img-container">
+        <img src="images/Exteter_Bladee1.png" alt="bladee 1" class="side-img" style="float: left;">
+        <img src="images/Exteter_Bladee2.png" alt="bladee 2" class="side-img" style="float: right;">
+        <img id="headLiner" src="images/headliner.gif" alt="headliner" style="">
+    </div>
 
     
-    
-     <img src="images/Exteter_Bladee1.png" alt="bladee 1" style="float: left; height: 400px; width:400px;">
-
-     <img id="headLiner" src="images\headliner.gif" alt="headliner">
-
-     <img src="images/Exteter_Bladee2.png" alt="bladee 2" style="float: right; height: 400px; width:400px;">     
-
+    <div style="margin: 0 auto; display: table;">
+        <audio controls="">
+            <source src="sounds/Bladee - Subaru Instrumental {remake}.mp3" type="audio/mpeg">
+        </audio>
+    </div>
 
 
-
-
-
-
-
-     
-     <div style="margin: 0 auto; display: table;">
-     <audio controls autoplay>
-     <source src="sounds\Bladee - Subaru Instrumental {remake}.mp3" type="audio/mpeg">
-     </audio>
-     </div>
-
-
-     <div class="btn-group">
+    <div class="btn-group">
 
         <a href="index.html">
-        <button style="color: limegreen;background-color: gray;">home</button>
+            <button style="color: limegreen;background-color: gray;">home</button>
         </a>
 
         <a href="about.html">
-        <button style="color: limegreen;background-color: gray;">about</button>
+            <button style="color: limegreen;background-color: gray;">about</button>
         </a>
 
         <a href="art-videos.html">
-        <button style="color: limegreen;background-color: gray;">art/videos</button>
-    </a>
+            <button style="color: limegreen;background-color: gray;">art/videos</button>
+        </a>
 
         <button style="color: limegreen;background-color: gray;">fishing memes</button>
         
         <button style="color: limegreen;background-color: gray;">contact</button>
-      </div>
+    </div>
 
 
+    <br>
+    
+    <img id="animeGirl" src="images/tumblr_f1d764d8191be52b3be2b576c3b1a705_78d4f44e_540.webp" alt="anime girl">
+    
+    <br>
+    
+    <div class="img-container">
+        <img src="images/paint city fire.gif" alt="bladee 1" class="side-img" style="float: left;">
+        <img src="images/paint city fire.gif" alt="bladee 2" class="side-img" style="float: right;">
+        <img src="images/6-17.png" alt="6-15-2024" class="center">
+    </div>
+    
+    <br>
+    
+    <div class="img-container">
+        <img src="images/paint city fire.gif" alt="bladee 1" class="side-img" style="float: left;">
+        <img src="images/paint city fire.gif" alt="bladee 2" class="side-img" style="float: right;">
+        <img src="images/6-15-2024 updates.png" alt="6-15-2024" class="center">
+    </div>
+    
+    <br>
+    
+    <div class="img-container">
+        <img src="images/paint city fire.gif" alt="bladee 1" class="side-img" style="float: left;">
+        <img src="images/paint city fire.gif" alt="bladee 2" class="side-img" style="float: right;">
+        <img src="images/frist post.png" alt="6-15-2024" class="center">
+    </div>
+    
+    <p style="text-align: center; color: red; text-decoration: solid;">
+        ©paintswag2024
+    </p>
 
-
-      
-
-
-
-
-
-
-
-
-
-
-      
-
-<br>
-     
-     <img id="animeGirl" src="images/tumblr_f1d764d8191be52b3be2b576c3b1a705_78d4f44e_540.webp" alt="anime girl">
-     
-<br>
-
-<img src="images/paint city fire.gif" alt="bladee 1" style="float: left; height: 400px; width:400px;">
-     <img src="images/paint city fire.gif" alt="bladee 2" style="float: right; height: 400px; width:400px;"> 
-<img src="images/6-17.png" alt="6-15-2024" class="center">
-
-
-     
-     <br>
-
-
-
-
-
-     
-     <img src="images/paint city fire.gif" alt="bladee 1" style="float: left; height: 400px; width:400px;">
-     <img src="images/paint city fire.gif" alt="bladee 2" style="float: right; height: 400px; width:400px;"> 
-    <img src="images/6-15-2024 updates.png" alt="6-15-2024" class="center">
-    <img src="images/paint city fire.gif" alt="bladee 1" style="float: left; height: 400px; width:400px;">
-    <img src="images/paint city fire.gif" alt="bladee 2" style="float: right; height: 400px; width:400px;"> 
-
-<br>
-
-
-<img src="images/frist post.png" alt="6-15-2024" class="center">
-
-
-
-
-
-<p style="text-align: center;color: red; text-decoration: solid;">
-    ©paintswag2024
-</p>
-
-</body>
-
-
-</html>
+</body></html>
