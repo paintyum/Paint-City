@@ -1,92 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
     <style>
-
-
- #spotify
-        {
+        #spotify, #youtube {
             display: block;
-        margin-left: auto;
-        margin-right: auto;
-        width: 8%;           
+            margin-left: auto;
+            margin-right: auto;
+            width: 8%;
         }
 
-
-
-        #youtube
-        {
-            display: block;
-        margin-left: auto;
-        margin-right: auto;
-        width: 8%;           
-        }
-
-
-
-
-
-
-
-
-
-body{
+        body {
             background-image: url(images/aboutb.gif);
             background-repeat: repeat;
             background-attachment: fixed
         }
 
-
-
-
-#headLiner 
-        {
+        #headLiner {
             display: block;
             margin-left: auto;
             margin-right: auto;
             width: 50%;
         }
 
-
-
-        .btn-group{
+        .btn-group {
             text-align: center;
         }
-
-
+        
+        #textBox {
+            margin-left: 25%; 
+            margin-right: 25%;
+        }
+        
+        @media only screen and (max-aspect-ratio: 4/3) {
+            #headLiner {
+                width: 80%;
+            }
+            #textBox {
+                margin-left: 5%; 
+                margin-right: 5%;
+            }
+            #spotify, #youtube {
+                width: 30%;
+            }
+        }
     </style>
-
-
+    
+    <link rel="icon" type="image/x-icon" href="/images/Untitled-1.png">
+    <title>PAINT CITY</title>
 </head>
-<title>PAINT CITY</title>
-
 <body>
-
     <img id="headLiner" src="images/about.gif" alt="headliner">
 
-
     <div class="btn-group">
-
         <a href="index.html">
-        <button style="color: limegreen;background-color: gray;">home</button>
+            <button style="color: limegreen;background-color: gray;">home</button>
         </a>
 
         <a href="about.html">
-        <button style="color: limegreen;background-color: gray;">about</button>
+            <button style="color: limegreen;background-color: gray;">about</button>
         </a>
 
         <a href="art-videos.html">
-        <button style="color: limegreen;background-color: gray;">art/videos</button>
+            <button style="color: limegreen;background-color: gray;">art/videos</button>
         </a>
 
         <button style="color: limegreen;background-color: gray;">fishing memes</button>
         
         <button style="color: limegreen;background-color: gray;">contact</button>
-      </div>
+    </div>
 
-<br>
-      <div style="margin-right: 25%; margin-left: 25%; border:15px solid rgb(67, 70, 70); background-color: rgb(255, 255, 255); text-align: center;">
+    <br>
+    
+    <div id="textBox" style="border:15px solid rgb(67, 70, 70); background-color: rgb(255, 255, 255); text-align: center;">
         <h1 style="text-align: left; font-weight: bold; text-align: center;">
             hi :p
         </h1>
@@ -101,26 +86,20 @@ body{
             if you wanna know more into it. I love the style of this website a lot and i feel it shows my creative mind perfectly. i will be updating this site over time so stay tuned!
 
         </p>
-    
     </div>
 
     <br>
 
-
-
-<a href="https://open.spotify.com/artist/2fQRHUCZhbGlpNodw9hnCH?si=U7pttCQlSuur_0dT-nW4uQ" target="_blank">
-    <img id="spotify" src="images/spotify.png" alt="spotify">
-</a>
+    <a href="https://open.spotify.com/artist/2fQRHUCZhbGlpNodw9hnCH?si=U7pttCQlSuur_0dT-nW4uQ" target="_blank">
+        <img id="spotify" src="images/spotify.png" alt="spotify">
+    </a>
+    
     <br>
 
     <a href="https://www.youtube.com/@paintyum/videos" target="_blank">
-     <img id="youtube" src="images/youtube.png" alt="youtube">
+        <img id="youtube" src="images/youtube.png" alt="youtube">
     </a>
 
-
-
-
-
 <br>
 <br>
 <br>
@@ -134,16 +113,7 @@ body{
 <br>
 <br>
 
-
-<p style="text-align: center;color: red; text-decoration: solid;">
-    ©paintswag2024
-</p>
-
-   
-
-
-
-
-
-
+    <p style="text-align: center;color: red; text-decoration: solid;">
+        ©paintswag2024
+    </p>
 </body>
