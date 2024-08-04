@@ -1,0 +1,173 @@
+@font-face {
+	font-family: "Windows XP Tahoma";
+	src:
+		url("windows-xp-tahoma.ttf") format("truetype")
+}
+
+#chat-box {
+    margin: 20px;
+    margin-left:auto;
+    margin-right:auto;
+	width: 600px;
+	height: auto;
+	position: relative;
+	
+	overflow-wrap: break-word;
+	
+	border: 8px solid Blue;
+	border-left: 16px solid Blue;
+	border-bottom: 16px solid Blue;
+	
+	background-color: FloralWhite;
+	color: Black;
+	font-family: Windows XP Tahoma;
+}
+#chat-box input,
+#chat-box button {
+	font-family: Windows XP Tahoma;
+}
+
+#chat-join-area {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	box-sizing: border-box;
+	background-color: Azure;
+	text-align: center;
+}
+#chat-join-area label,
+#chat-join-area input {
+	font-size: 16pt;
+}
+#chat-join-area button {
+	font-size: 24pt;
+}
+#chat-join-area h1 {
+	margin: 0;
+	font-size: 48pt;
+}
+#chat-join-area p {
+	font-size: 16pt;
+}
+
+#chat-area {
+	display: block;
+}
+#chat-area h2 {
+	font-size: 20pt;
+}
+#chat-list {
+	width: 80%;
+	height: 400px;
+
+	overflow-y: scroll;
+}
+#user-list {
+	margin: 0;
+	padding: 4px;
+	width: 20%;
+	height: 400px;
+	box-sizing: border-box;
+
+	overflow-y: auto;
+	
+	font-size: 16pt;
+}
+#user-list h2 {
+	margin: 0;
+	text-align: center;
+}
+#user-list p {
+	margin: 0;
+	margin-top: 4px;
+	padding: 2px;
+	border-right: 2px solid Blue;
+}
+
+#chat-input {
+	width: 100%;
+	box-sizing: border-box;
+	border: 4px solid Gray;
+	
+	outline: none;
+	
+	background: transparent;
+	
+	font-size: 16pt;
+}
+.chat-block {
+	width: 100%;
+	display: block;
+	padding: 1px;
+	box-sizing: border-box;
+}
+.system-message {
+	margin: 4px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 2px;
+	
+	min-width: 20%;
+	max-width: 90%;
+	background-color: BlanchedAlmond;
+	text-align: center;
+}
+.system-message-content {
+	margin: 2px;
+	font-weight: bold;
+	
+	font-size: 20pt;
+}
+
+.message {
+	padding: 1px;
+	width: 100%;
+	display: block;
+	box-sizing: border-box;
+	
+	color: Blue;
+}
+.message-top {
+	width: 100%;
+	box-sizing: border-box;
+}
+.message-author {
+	margin: 1px;
+	width: fit-content;
+	display: inline;
+	
+	font-size: 20pt;
+	font-weight: bold;
+}
+.message-time {
+	margin: 2px;
+	margin-left: auto;
+	width: fit-content;
+	display: inline;
+	float: right;
+	
+	color: Gray;
+	font-size: 18pt;
+	letter-spacing: 1px;
+	font-weight: bold;
+}
+.message-content {
+	margin: 1px;
+	width: 90%;
+	display: block;
+	
+	color: Black;
+	font-size: 16pt;
+}
+.message-client {
+	color: Red;
+}
+.name {
+	color: Blue;
+	text-decoration: underline;
+}
+.hidden {
+	visibility: hidden;
+}

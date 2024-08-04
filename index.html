@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8">
     
-    <!--
-    <meta name="description" content="Description">
-    <meta name="author" content="Author">
-    -->
+    <meta name="description" content="Swagland">
+    <meta name="author" content="Paintyum">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="style-chat.css">
     
     <script>
     function PlayMusic() {
@@ -130,6 +130,25 @@
     <img id="animeGirl" src="images/tumblr_f1d764d8191be52b3be2b576c3b1a705_78d4f44e_540.webp" alt="anime girl">
     
     <br>
+    
+    <div id="chat-box">
+        <div id="chat-area" class="hidden">
+            <div style="display: flex;">
+                <div id="chat-list"></div>
+                <div id="user-list"><h2>User List</h2></div>
+            </div>
+            <input type="text" id="chat-input"></input>
+        </div>
+        
+        <div id="chat-join-area">
+            <h1>LOGIN TO CHAT</h1>
+            <label for="username">Name:</label>
+            <input type="text" name="username" id="username"></input>
+            <br><br>
+            <button id="join">JOIN</button>
+            <p id="chat-join-message"></p>
+        </div>
+    </div>
 
     <div class="img-container">
         <img src="images/paint city fire.gif" alt="bladee 1" class="side-img" style="float: left;">
@@ -165,4 +184,6 @@
         &copy;paintswag2024
     </p>
 
-</body></html>
+</body>
+<script src="index.js"></script>
+</html>
