@@ -1,0 +1,72 @@
+/*.container {
+    position: relative;
+    text-align: center;
+    color: rgb(255, 0, 0);
+    width: 40%;
+    padding-left: 30%;
+    font-family: ;
+}*/
+
+body {
+    background-image: url(images/1971772_c37cc.gif);
+    background-repeat: repeat;
+    background-attachment: fixed
+}
+
+#animeGirl {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 25%;           
+}
+
+#headLiner {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+
+.img-container {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+}
+.side-img {
+    width:25%;
+    aspect-ratio: 1;
+}
+
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 35%;
+}
+
+#music-container {
+    position: fixed;
+    
+    height: 100px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    
+    background-color: Gray;
+    border-top: 4px solid White;
+}
+
+@media only screen and (max-aspect-ratio: 4/3) {
+    #headLiner {
+        width: 80%;
+    }
+    #animeGirl {
+        width: 50%;
+    }
+    .side-img {
+        width: 45%;
+    }
+    .center {
+        width: 100%;
+    }
+}

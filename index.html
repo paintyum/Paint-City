@@ -8,84 +8,12 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
+    <link rel="stylesheet" href="style-all.css">
+    <link rel="stylesheet" href="style-index.css">
     <link rel="stylesheet" href="style-chat.css">
     
-    <script>
-    function PlayMusic() {
-        let audio = document.getElementsByTagName("audio")[0];
-        audio.play();
-    }
-    addEventListener("load", (event) => {
-        setTimeout(PlayMusic, 3000);
-    });
-    </script>
-    
-    <style>
-        /*.container {
-            position: relative;
-            text-align: center;
-            color: rgb(255, 0, 0);
-            width: 40%;
-            padding-left: 30%;
-            font-family: ;
-        }*/
-        
-        body {
-            background-image: url(images/1971772_c37cc.gif);
-            background-repeat: repeat;
-            background-attachment: fixed
-        }
-        
-        .btn-group {
-            text-align: center;
-        }
-
-        #animeGirl {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            width: 25%;           
-        }
-
-        #headLiner {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            width: 50%;
-        }
-        
-        .img-container {
-            display: table;
-            table-layout: fixed;
-            width: 100%;
-        }
-        .side-img {
-            width:25%;
-            aspect-ratio: 1;
-        }
-
-        .center {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            width: 35%;
-        }
-        
-        @media only screen and (max-aspect-ratio: 4/3) {
-            #headLiner {
-                width: 80%;
-            }
-            #animeGirl {
-                width: 50%;
-            }
-            .side-img {
-                width: 45%;
-            }
-            .center {
-                width: 100%;
-            }
-        }
-    </style>
+    <script defer src="chat.js"></script>
+    <script defer src="music.js"></script>
 
     <link rel="icon" type="image/x-icon" href="images/Untitled-1.png">
     <title>PAINT CITY</title>
@@ -96,57 +24,39 @@
         <img src="images/Exteter_Bladee2.png" alt="bladee 2" class="side-img" style="float: right;">
         <img id="headLiner" src="images/headliner.gif" alt="headliner" style="">
     </div>
-
     
-    <div style="margin: 0 auto; display: table;">
+    <!--<div style="margin: 0 auto; display: table;">
         <audio controls="">
             <source src="sounds/Bladee - Subaru Instrumental {remake}.mp3" type="audio/mpeg">
         </audio>
-    </div>
-
+    </div>-->
 
     <div class="btn-group">
-
-        <a href="index.html">
-            <button style="color: limegreen;background-color: gray;">home</button>
-        </a>
-
-        <a href="about.html">
-            <button style="color: limegreen;background-color: gray;">about</button>
-        </a>
-
-        <a href="art-videos.html">
-            <button style="color: limegreen;background-color: gray;">art/videos</button>
-        </a>
-
-        <button style="color: limegreen;background-color: gray;">fishing memes</button>
-        
-        <button style="color: limegreen;background-color: gray;">contact</button>
+        <a href="index.html"><button class="btn">home</button></a>
+        <a href="about.html"><button class="btn">about</button></a>
+        <a href="art-videos.html"><button class="btn">art/videos</button></a>
+        <a href="https://youtu.be/sTSA_sWGM44?si=sIr33OK38w5oB17T&t=5"><button class="btn">fishing memes</button></a>
+        <button class="btn">contact</button>
     </div>
 
-
-    <br>
-    
-    <img id="animeGirl" src="images/tumblr_f1d764d8191be52b3be2b576c3b1a705_78d4f44e_540.webp" alt="anime girl">
-    
-    <br>
-    
-    <div id="chat-box">
-        <div id="chat-area" class="hidden">
-            <div style="display: flex;">
-                <div id="chat-list"></div>
-                <div id="user-list"><h2>User List</h2></div>
+    <div style="background: url(images/tumblr_f1d764d8191be52b3be2b576c3b1a705_78d4f44e_540.webp); background-size: 10%;">
+        <div id="chat-box">
+            <div id="chat-area" class="hidden">
+                <div style="display: flex;">
+                    <div id="chat-list"></div>
+                    <div id="user-list"><h2>User List</h2></div>
+                </div>
+                <input type="text" id="chat-input"></input>
             </div>
-            <input type="text" id="chat-input"></input>
-        </div>
-        
-        <div id="chat-join-area">
-            <h1>LOGIN TO CHAT</h1>
-            <label for="username">Name:</label>
-            <input type="text" name="username" id="username"></input>
-            <br><br>
-            <button id="join">JOIN</button>
-            <p id="chat-join-message"></p>
+            
+            <div id="chat-join-area">
+                <h1>LOGIN TO CHAT</h1>
+                <label for="username">Name:</label>
+                <input type="text" name="username" id="username"></input>
+                <br><br>
+                <button id="join">JOIN</button>
+                <p id="chat-join-message"></p>
+            </div>
         </div>
     </div>
 
@@ -183,7 +93,9 @@
     <p style="text-align: center; color: red; text-decoration: solid;">
         &copy;paintswag2024
     </p>
-
+    
+    <div id="music-container">
+        <a id="music-play">PLAY</a>
+    </div>
 </body>
-<script src="index.js"></script>
 </html>

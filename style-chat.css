@@ -19,6 +19,8 @@
 	border-bottom: 16px solid Blue;
 	
 	background-color: FloralWhite;
+    /*background: url('images/tumblr_f1d764d8191be52b3be2b576c3b1a705_78d4f44e_540.webp');
+    background-size:cover;*/
 	color: Black;
 	font-family: Windows XP Tahoma;
 }
@@ -170,4 +172,10 @@
 }
 .hidden {
 	visibility: hidden;
+}
+
+@media only screen and (max-aspect-ratio: 4/3) {
+    #chat-box {
+        width: 90%;
+    }
 }

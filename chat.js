@@ -17,7 +17,7 @@ var username = "";
 function SendJoin() {
 	chatJoinMessage.innerHTML = 'Joining...';
 	
-	username = usernameInput.value;
+	username = usernameInput.value.replaceAll(' ', '_');
 	var info = { type: 'join_chat', username: username };
 	ws.send(JSON.stringify(info));
 }
@@ -40,7 +40,7 @@ function ResetChat() {
 
 function Connect() {
 	ws = new WebSocket('wss://painty-city-server.onrender.com');
-	chatJoinMessage.innerHTML = 'Connecting...';
+	chatJoinMessage.innerText = 'Connecting...\nMay take up to 2 minutes if no one is currently in chat';
 	
 	ws.addEventListener('open', (event) => {
 		chatJoinMessage.innerHTML = 'Connected!';
