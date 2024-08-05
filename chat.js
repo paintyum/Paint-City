@@ -50,8 +50,7 @@ function ResetChat() {
 }
 
 function Connect() {
-	ws = new WebSocket('ws://localhost:8080');
-	//ws = new WebSocket('wss://painty-city-server.onrender.com');
+	ws = new WebSocket('wss://painty-city-server.onrender.com');
 	chatJoinMessage.innerText = 'Connecting...';
 	
 	ws.addEventListener('open', (event) => {
