@@ -4,8 +4,14 @@
 		url("windows-xp-tahoma.ttf") format("truetype")
 }
 
+#chat-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background: url(images/tumblr_f1d764d8191be52b3be2b576c3b1a705_78d4f44e_540.webp);
+    background-size: 10%;
+}
 #chat-box {
-    margin: 20px;
+    image-rendering: pixelated;
     margin-left:auto;
     margin-right:auto;
 	width: 600px;
@@ -175,6 +181,11 @@
 }
 
 @media only screen and (max-aspect-ratio: 4/3) {
+    #chat-container {
+        background-size: 15%;
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
     #chat-box {
         width: 90%;
     }

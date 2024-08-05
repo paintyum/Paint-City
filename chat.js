@@ -1,3 +1,5 @@
+(function(){
+
 const chatArea = document.getElementById("chat-area");
 const chatList = document.getElementById("chat-list");
 const userList = document.getElementById("user-list");
@@ -10,6 +12,11 @@ const chatJoinMessage = document.getElementById("chat-join-message");
 
 var ws = null;
 
+var reconnect_interval = null;
+var user_count_interval = null;
+
+var connected = false;
+
 var joining = false;
 var chat_open = false;
 var username = "";
@@ -19,6 +26,10 @@ function SendJoin() {
 	
 	username = usernameInput.value.replaceAll(' ', '_');
 	var info = { type: 'join_chat', username: username };
+	ws.send(JSON.stringify(info));
+}
+function SendUserCountQuery() {
+	var info = { type: 'query_user_count' };
 	ws.send(JSON.stringify(info));
 }
 function SendMessage(message) {
@@ -39,21 +50,31 @@ function ResetChat() {
 }
 
 function Connect() {
-	ws = new WebSocket('wss://painty-city-server.onrender.com');
-	chatJoinMessage.innerText = 'Connecting...\nMay take up to 2 minutes if no one is currently in chat';
+	ws = new WebSocket('ws://localhost:8080');
+	//ws = new WebSocket('wss://painty-city-server.onrender.com');
+	chatJoinMessage.innerText = 'Connecting...';
 	
 	ws.addEventListener('open', (event) => {
+		connected = true;
+		
+		clearInterval(reconnect_interval);
+		reconnect_interval = null;
+		
 		chatJoinMessage.innerHTML = 'Connected!';
-		SendJoin();
+		SendUserCountQuery();
+		user_count_interval = setInterval(SendUserCountQuery, 10 * 1000);
 	});
 	ws.addEventListener('close', (event) => {
 		ws = null;
+		connected = false;
 		joining = false;
 		SetInChat(false);
 		
+		reconnect_interval = setInterval(Connect, 10 * 1000);
+		
 		// Failed to connect to server
 		if (event.code == 1006) {
-			chatJoinMessage.innerHTML = 'Server failed, try again.';
+			chatJoinMessage.innerHTML = 'Server failed, reconnecting...';
 		}
 	});
 	ws.addEventListener('error', (event) => {
@@ -63,7 +84,11 @@ function Connect() {
 		var data = JSONParse(event.data.toString());
 		if (!(data instanceof Object)) return;
 		
-		if (data.type === 'user_join') {
+		if (data.type === 'user_count') {
+            if (data.count == 1) chatJoinMessage.innerHTML = `Connected!<br><span style="font-size: 24pt; font-weight: bold;">${data.count}</span> active chatter!`;
+			else chatJoinMessage.innerHTML = `Connected!<br><span style="font-size: 24pt; font-weight: bold;">${data.count}</span> active chatters!`;
+		}
+		else if (data.type === 'user_join') {
 			var p = document.createElement('p');
 			p.innerText = data.username;
 			userList.appendChild(p);
@@ -81,6 +106,9 @@ function Connect() {
 			PutSystemMessage(`<span class="name">${data.username}</span> left the chat`);
 		}
 		else if (data.type === 'join_success') {
+			clearInterval(user_count_interval);
+			user_count_interval = null;
+			
 			joining = false;
 			
 			SetInChat(true);
@@ -121,15 +149,18 @@ function SetInChat(in_chat) {
 	}
 }
 function EnterChat() {
-	if (usernameInput.value.length >= 3 && usernameInput.value.length <= 16) {
-		if (!joining && !chat_open) {
-			joining = true;
-			
-			if (ws === null) Connect();
-			else SendJoin();
-		}
-	}
+	if (!connected) return;
+	if (!(usernameInput.value.length >= 3 && usernameInput.value.length <= 16)) {
+        chatJoinMessage.innerHTML = "Name must be between 3 and 16 characters";
+        return;
+    }
+    if (!joining && !chat_open) {
+        joining = true;
+        SendJoin();
+    }
 }
+
+Connect();
 
 usernameInput.addEventListener('keydown', (event) => {
 	if (event.key === 'Enter') EnterChat();
@@ -189,3 +220,5 @@ chatInput.addEventListener('keydown', (event) => {
 		chatInput.value = '';
 	}
 });
+
+})();

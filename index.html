@@ -39,7 +39,7 @@
         <button class="btn">contact</button>
     </div>
 
-    <div style="background: url(images/tumblr_f1d764d8191be52b3be2b576c3b1a705_78d4f44e_540.webp); background-size: 10%;">
+    <div id="chat-container">
         <div id="chat-box">
             <div id="chat-area" class="hidden">
                 <div style="display: flex;">
@@ -95,7 +95,26 @@
     </p>
     
     <div id="music-container">
-        <a id="music-play">PLAY</a>
+        <button id="music-select-previous" class="music-button"></button>
+        <button id="music-play" class="music-button"></button>
+        <button id="music-select-next" class="music-button"></button>
+        
+        <p id="music-progress-time">0:00</p>
+        
+        <div>
+            <p id="music-name"></p>
+            <div id="music-progress-bar">
+                <div id="music-progress"></div>
+            </div>
+        </div>
+        
+        <p id="music-total-time">0:00</p>
+        
+        <button id="music-mute" class="music-button"></button>
+        <div id="music-volume-bar">
+            <div id="music-volume"></div>
+        </div>
+        <p id="music-volume-value">100%</p>
     </div>
 </body>
 </html>
