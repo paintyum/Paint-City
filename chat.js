@@ -70,7 +70,8 @@ function Connect() {
 		SetInChat(false);
 		
 		reconnect_interval = setInterval(Connect, 10 * 1000);
-		
+		clearInterval(user_count_interval);
+        
 		// Failed to connect to server
 		if (event.code == 1006) {
 			chatJoinMessage.innerHTML = 'Server failed, reconnecting...';
@@ -190,21 +191,24 @@ function PutSystemMessage(content) {
 function PutMessage(author, content, client, time) {	
 	var chat_block = CreateTagClass('div', 'chat-block');
 	var message = CreateTagClass('div', 'message');
-	var message_top = CreateTagClass('div', 'message-top');
-	var message_author = CreateTagClass('p', 'message-author');
+	//var message_top = CreateTagClass('div', 'message-top');
+	//var message_author = CreateTagClass('p', 'message-author');
 	var message_time = CreateTagClass('p', 'message-time');
 	var message_content = CreateTagClass('p', 'message-content');
 	
 	if (client) message.classList.add('message-client');
 	
-	message_author.innerText = author + ' says';
+	//message_author.innerText = author + ' says';
+    message_content.innerText = content;
+    if (client) message_content.innerHTML = `<span style="color:red; font-weight: bold;">${author}: </span>` + message_content.innerText;
+    else message_content.innerHTML = `<span style="color:blue; font-weight: bold;">${author}: </span>` + message_content.innerText;
 	message_time.innerText = time;
-	message_content.innerText = content;
 	
-	message_top.appendChild(message_author);
-	message_top.appendChild(message_time);
-	message.appendChild(message_top);
+	//message_top.appendChild(message_author);
+	//message_top.appendChild(message_time);
+	//message.appendChild(message_top);
 	message.appendChild(message_content);
+	message.appendChild(message_time);
 	
 	chat_block.appendChild(message);
 	

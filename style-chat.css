@@ -69,6 +69,7 @@
 #chat-list {
 	width: 80%;
 	height: 400px;
+    padding: 1px;
 
 	overflow-y: scroll;
 }
@@ -132,12 +133,12 @@
 .message {
 	padding: 1px;
 	width: 100%;
-	display: block;
-	box-sizing: border-box;
+	display: flex;
+    height: fit-content;
 	
 	color: Blue;
 }
-.message-top {
+/*.message-top {
 	width: 100%;
 	box-sizing: border-box;
 }
@@ -148,29 +149,25 @@
 	
 	font-size: 20pt;
 	font-weight: bold;
-}
-.message-time {
-	margin: 2px;
-	margin-left: auto;
-	width: fit-content;
-	display: inline;
-	float: right;
-	
-	color: Gray;
-	font-size: 18pt;
-	letter-spacing: 1px;
-	font-weight: bold;
-}
+}*/
 .message-content {
-	margin: 1px;
-	width: 90%;
+	margin: 0;
+	width: 75%;
 	display: block;
 	
 	color: Black;
 	font-size: 16pt;
 }
-.message-client {
-	color: Red;
+.message-time {
+	margin: 0;
+	width: 25%;
+	display: inline;
+	text-align: end;
+	
+	color: Gray;
+	font-size: 16pt;
+	letter-spacing: 1px;
+	font-weight: bold;
 }
 .name {
 	color: Blue;

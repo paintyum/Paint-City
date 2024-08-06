@@ -8,7 +8,7 @@
 }*/
 
 body {
-    background-image: url(images/1971772_c37cc.gif);
+    background-image: url("images/1971772_c37cc.gif");
     background-repeat: repeat;
     background-attachment: fixed;
 }
@@ -59,9 +59,11 @@ body {
     background: Gray;
     border-top: 4px solid White;
     background-color: #003265;
-    background-image: url(images/cat-space.gif);
-    background-size: auto 200%;
-    background-position-y: 50%;
+    background-image: url("images/cat-space.gif"), url("images/cat-space-right.gif");
+    background-size: auto 200%, auto 200%;
+    background-position-x: 0%, 100%;
+    background-position-y: 50%, 50%;
+    background-repeat: no-repeat, no-repeat;
     
     touch-action: none;
 }
