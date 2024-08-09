@@ -12,7 +12,6 @@ const chatJoinMessage = document.getElementById("chat-join-message");
 
 var ws = null;
 
-var reconnect_interval = null;
 var user_count_interval = null;
 
 var connected = false;
@@ -56,12 +55,10 @@ function Connect() {
 	ws.addEventListener('open', (event) => {
 		connected = true;
 		
-		clearInterval(reconnect_interval);
-		reconnect_interval = null;
-		
 		chatJoinMessage.innerHTML = 'Connected!';
 		SendUserCountQuery();
-		user_count_interval = setInterval(SendUserCountQuery, 10 * 1000);
+		
+        if (user_count_interval === null) user_count_interval = setInterval(SendUserCountQuery, 10 * 1000);
 	});
 	ws.addEventListener('close', (event) => {
 		ws = null;
@@ -69,12 +66,14 @@ function Connect() {
 		joining = false;
 		SetInChat(false);
 		
-		reconnect_interval = setInterval(Connect, 10 * 1000);
+        setTimeout(Connect, 10 * 1000);
+        
 		clearInterval(user_count_interval);
+        user_count_interval = null;
         
 		// Failed to connect to server
 		if (event.code == 1006) {
-			chatJoinMessage.innerHTML = 'Server failed, reconnecting...';
+			chatJoinMessage.innerHTML = 'Server failed, reconnecting in 10 seconds...';
 		}
 	});
 	ws.addEventListener('error', (event) => {
