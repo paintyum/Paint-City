@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PaintMusic - Personal Blog</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
+  <link rel="shortcut icon" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrapper-retro">
+    <div class="header-retro">
+      <div class="header-container">
+        <img src="https://media1.tenor.com/m/-v0gLfm3FtEAAAAd/chuzzle-raptisoft.gif" alt="chuzzle" class="chuzzle-left">
+        <div class="header-center">
+          <img src="logo.png" alt="Paint's Music Page" class="header-logo">
+          <div class="blink">i love music and chuzzle</div>
+          <div id="userLink" class="user-status"><a href="login.html">login</a></div>
+          <div class="online-counter">ONLINE: <span id="onlineCount">0</span> <img src="users-online.png" alt="users" class="users-icon"></div>
+        </div>
+        <img src="https://media1.tenor.com/m/-v0gLfm3FtEAAAAd/chuzzle-raptisoft.gif" alt="chuzzle" class="chuzzle-right">
+      </div>
+    </div>
+
+    <div class="nav-center">
+  <a href="index.html"><img src="album-reviews.png" alt="Album Reviews" class="nav-img"></a>
+  <a href="interviews.html"><img src="interviews.png" alt="Interviews" class="nav-img"></a>
+  <a href="blog.html"><img src="personal-blog.png" alt="Personal Blog" class="nav-img"></a>
+</div>
+
+    <div class="main-container">
+      <div class="content-retro">
+        <div class="blog-header">
+          <img src="personal-blog.png" alt="Personal Blog" class="blog-title-logo">
+          <button id="newPostBtn" onclick="showNewPostForm()" style="display: none;">New Post</button>
+        </div>
+
+        <div id="postsContainer"></div>
+      </div>
+    </div>
+
+    <div id="newPostModal" class="modal">
+      <div class="modal-content">
+        <h2>New Post</h2>
+        <form onsubmit="return false;">
+          <textarea id="postContent" rows="6" placeholder="What's on your mind?" required></textarea>
+          
+          <div class="image-upload-container">
+            <label style="color: #ffff00; display: block; margin: 15px 0 5px 0; font-weight: bold;">Upload Image (optional):</label>
+            <input type="file" id="postImageInput" accept="image/*" onchange="previewPostImage(event)">
+            <img id="postImagePreview" class="image-preview" style="display: none;">
+          </div>
+          
+          <div class="modal-buttons">
+            <button type="button" onclick="submitNewPost()">Post</button>
+            <button type="button" onclick="hideNewPostForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="footer">
+      &copy; paintmusic<br>
+      i luv u chuzzle
+    </div>
+  </div>
+
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="userbar.js"></script>
+  <script type="module" src="online-counter.js"></script>
+  <script type="module" src="blog.js"></script>
+
+  <!-- Radio and Chatroom Container -->
+  <div class="radio-chat-wrapper" id="radioChatWrapper">
+    <div class="music-player" id="musicPlayer">
+    <div class="player-header" id="playerHeader">
+      <div class="player-title">PAINTYUM RADIO</div>
+      <div class="player-controls-top">
+        <button onclick="toggleMinimize()" class="minimize-btn">_</button>
+      </div>
+    </div>
+    
+    <div class="player-content" id="playerContent">
+      <div class="player-display">
+        <div class="player-time" id="playerStatus">⚫ OFFLINE</div>
+        <div class="player-station">PAINTYUM RADIO</div>
+        <div class="player-track">Waiting for stream...</div>
+      </div>
+      
+      <div class="player-buttons">
+        <button onclick="previousTrack()" title="Previous">⏮</button>
+        <button onclick="togglePlay()" id="playBtn" title="Play">▶</button>
+        <button onclick="stopStream()" title="Stop">⏹</button>
+        <button onclick="nextTrack()" title="Next">⏭</button>
+      </div>
+      
+      <div class="volume-control">
+        <span>Volume</span>
+        <input type="range" min="0" max="100" value="80" id="volumeSlider" onchange="changeVolume(this.value)">
+        <span id="volumeDisplay">80</span>
+      </div>
+    </div>
+    </div>
+
+    <!-- Chatroom Section -->
+    <div class="chat-container" id="chatContainer">
+      <div class="chat-users-sidebar" id="chatUsersSidebar">
+        <div class="chat-users-title">USERS</div>
+        <div class="chat-users-list" id="chatUsersList"></div>
+      </div>
+      <div class="chat-main">
+        <div class="chat-header">
+          <span>CHATROOM</span>
+          <div>
+            <button id="untimeoutBtn" onclick="showUntimeoutModal()" style="display: none; background: #00ff00; color: #000; padding: 5px 10px; border: none; cursor: pointer; font-size: 11px; margin-left: 10px;">Untimeout</button>
+            <button id="unbanBtn" onclick="showUnbanModal()" style="display: none; background: #ffaa00; color: #000; padding: 5px 10px; border: none; cursor: pointer; font-size: 11px; margin-left: 10px;">Unban</button>
+          </div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-login-message" id="loginMessage">Please log in to chat</div>
+        <div class="chat-input-container" id="chatInputContainer" style="display: none;">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Type your message...">
+          <button onclick="sendMessage()" class="chat-send-btn">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Untimeout Modal -->
+    <div id="untimeoutModal" class="chat-modal" style="display: none;">
+      <div class="chat-modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <h3 style="margin: 0; color: #00ffff;">Untimeout Users</h3>
+          <button onclick="closeUntimeoutModal()" style="background: #cc0000; color: #fff; border: none; padding: 5px 10px; cursor: pointer;">Close</button>
+        </div>
+        <div id="untimeoutModalContent"></div>
+      </div>
+    </div>
+
+    <!-- Unban Modal -->
+    <div id="unbanModal" class="chat-modal" style="display: none;">
+      <div class="chat-modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <h3 style="margin: 0; color: #00ffff;">Banned Usernames</h3>
+          <button onclick="closeUnbanModal()" style="background: #cc0000; color: #fff; border: none; padding: 5px 10px; cursor: pointer;">Close</button>
+        </div>
+        <div id="unbanModalContent"></div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <audio id="radioStream" preload="auto"></audio>
+
+  <script type="module" src="chat.js"></script>
+
+  <script>
+    const audio = document.getElementById('radioStream');
+    const playBtn = document.getElementById('playBtn');
+    const playerContent = document.getElementById('playerContent');
+    const musicPlayer = document.getElementById('musicPlayer');
+    const radioChatWrapper = document.getElementById('radioChatWrapper');
+    
+    // Radio server configuration
+    // For local network access, use your local IP (192.168.86.28)
+    // For internet access via ngrok, the code will auto-detect the ngrok URL
+    
+    // LOCAL NETWORK ACCESS (same WiFi/network):
+    const LOCAL_IP = '192.168.86.28'; // Your local network IP
+    
+    // Auto-detect: use localhost if on same machine, otherwise use local IP
+    let RADIO_HOST = LOCAL_IP;
+    let RADIO_PORT = 8000;
+    let USE_HTTPS = false;
+    
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '') {
+      RADIO_HOST = 'localhost';
+    }
+    
+    // Try to auto-detect ngrok URL (if ngrok is running)
+    async function detectNgrokUrl() {
+      try {
+        const response = await fetch('http://127.0.0.1:4040/api/tunnels');
+        const data = await response.json();
+        
+        if (data.tunnels && data.tunnels.length > 0) {
+          // Find the tunnel that forwards to localhost:8000
+          const tunnel = data.tunnels.find(t => 
+            t.config.addr && t.config.addr.includes('8000')
+          ) || data.tunnels[0]; // Fallback to first tunnel
+          
+          if (tunnel && tunnel.public_url) {
+            const ngrokUrl = tunnel.public_url;
+            console.log('Auto-detected ngrok URL:', ngrokUrl);
+            
+            // Use ngrok URL
+            RADIO_HOST = ngrokUrl.replace('https://', '').replace('http://', '');
+            RADIO_PORT = '';
+            USE_HTTPS = ngrokUrl.startsWith('https://');
+            
+            // Update audio source
+            const PROTOCOL = USE_HTTPS ? 'https' : 'http';
+            const PORT_STRING = RADIO_PORT ? `:${RADIO_PORT}` : '';
+            const STREAM_URL = `${PROTOCOL}://${RADIO_HOST}${PORT_STRING}/stream`;
+            const STATUS_URL = `${PROTOCOL}://${RADIO_HOST}${PORT_STRING}/status-json.xsl`;
+            
+            const streamUrl = window.STREAM_URL || STREAM_URL;
+        audio.src = streamUrl;
+            window.STREAM_URL = STREAM_URL;
+            window.STATUS_URL = STATUS_URL;
+            
+            console.log('Radio server URL (ngrok):', STREAM_URL);
+            return true;
+          }
+        }
+      } catch (err) {
+        // ngrok not running or not accessible, use local network
+        console.log('ngrok not detected, using local network:', err.message);
+      }
+      return false;
+    }
+    
+    // Initialize radio URLs
+    let STREAM_URL, STATUS_URL;
+    
+    // Try to get ngrok URL from Firebase (auto-updates without code changes)
+    async function getNgrokUrlFromFirebase() {
+      try {
+        const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+        const { db } = await import('./firebase.js');
+        const configDoc = await getDoc(doc(db, 'config', 'radio'));
+        if (configDoc.exists()) {
+          const data = configDoc.data();
+          if (data.ngrokUrl) {
+            console.log('Got ngrok URL from Firebase:', data.ngrokUrl);
+            return data.ngrokUrl;
+          }
+        }
+      } catch (err) {
+        console.log('Could not get ngrok URL from Firebase:', err.message);
+      }
+      return null;
+    }
+    
+    // If site is HTTPS, we MUST use HTTPS stream (ngrok)
+    const isHttpsSite = window.location.protocol === 'https:';
+    
+    // Try to detect ngrok first, then fall back to Firebase, then local network
+    detectNgrokUrl().then(async (ngrokFound) => {
+      if (!ngrokFound) {
+        // Try to get from Firebase
+        const firebaseNgrokUrl = await getNgrokUrlFromFirebase();
+        
+        if (firebaseNgrokUrl) {
+          // Use ngrok URL from Firebase
+          RADIO_HOST = firebaseNgrokUrl.replace('https://', '').replace('http://', '');
+          RADIO_PORT = '';
+          USE_HTTPS = firebaseNgrokUrl.startsWith('https://');
+          STREAM_URL = `${USE_HTTPS ? 'https' : 'http'}://${RADIO_HOST}/stream`;
+          STATUS_URL = `${USE_HTTPS ? 'https' : 'http'}://${RADIO_HOST}/status-json.xsl`;
+          const streamUrl = window.STREAM_URL || STREAM_URL;
+          audio.src = streamUrl;
+          window.STREAM_URL = STREAM_URL;
+          window.STATUS_URL = STATUS_URL;
+          console.log('Using ngrok URL from Firebase:', STREAM_URL);
+        } else if (isHttpsSite) {
+          // HTTPS site needs HTTPS stream - warn user
+          console.error('ERROR: HTTPS site requires ngrok URL. Please set it in Firebase config/radio document.');
+        } else {
+          // Use local network (only works on HTTP sites or localhost)
+          const PROTOCOL = USE_HTTPS ? 'https' : 'http';
+          const PORT_STRING = RADIO_PORT ? `:${RADIO_PORT}` : '';
+          STREAM_URL = `${PROTOCOL}://${RADIO_HOST}${PORT_STRING}/stream`;
+          STATUS_URL = `${PROTOCOL}://${RADIO_HOST}${PORT_STRING}/status-json.xsl`;
+          const streamUrl = window.STREAM_URL || STREAM_URL;
+          audio.src = streamUrl;
+          window.STREAM_URL = STREAM_URL;
+          window.STATUS_URL = STATUS_URL;
+          console.log('Radio server URL (local network):', STREAM_URL);
+        }
+      }
+    });
+    
+    // Set initial URLs (will be updated if ngrok is found)
+    const PROTOCOL = USE_HTTPS ? 'https' : 'http';
+    const PORT_STRING = RADIO_PORT ? `:${RADIO_PORT}` : '';
+    STREAM_URL = `${PROTOCOL}://${RADIO_HOST}${PORT_STRING}/stream`;
+    STATUS_URL = `${PROTOCOL}://${RADIO_HOST}${PORT_STRING}/status-json.xsl`;
+    window.STREAM_URL = STREAM_URL;
+    window.STATUS_URL = STATUS_URL;
+    
+    let isPlaying = false;
+    let isMinimized = false;
+    let streamIsLive = false;
+    
+    audio.src = STREAM_URL;
+    audio.volume = 0.8;
+    
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    const playerHeader = document.getElementById('playerHeader');
+    const chatContainer = document.getElementById('chatContainer');
+
+    // Ensure chat container is visible on page load
+    if (chatContainer) {
+      chatContainer.style.display = 'flex';
+    }
+
+    // Make both header and chat container draggable
+    playerHeader.addEventListener('mousedown', dragStart);
+    if (chatContainer) {
+      chatContainer.addEventListener('mousedown', dragStart);
+    }
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
+
+    function dragStart(e) {
+      // Don't drag if clicking buttons or input fields
+      if (e.target.classList.contains('minimize-btn') || 
+          e.target.tagName === 'BUTTON' || 
+          e.target.tagName === 'INPUT' ||
+          e.target.closest('button') ||
+          e.target.closest('input')) {
+        return;
+      }
+      
+      // Get current position of the wrapper
+      const rect = radioChatWrapper.getBoundingClientRect();
+      initialX = e.clientX - rect.left;
+      initialY = e.clientY - rect.top;
+      isDragging = true;
+      
+      if (e.target.closest('#playerHeader')) {
+        playerHeader.style.cursor = 'grabbing';
+      }
+      if (chatContainer) {
+        chatContainer.style.cursor = 'grabbing';
+      }
+    }
+
+    function drag(e) {
+      if (isDragging) {
+        e.preventDefault();
+        
+        // Calculate new position
+        currentX = e.clientX - initialX;
+        currentY = e.clientY - initialY;
+        
+        // Update position - use fixed positioning
+        radioChatWrapper.style.left = currentX + 'px';
+        radioChatWrapper.style.top = currentY + 'px';
+        radioChatWrapper.style.bottom = 'auto';
+        radioChatWrapper.style.transform = 'none';
+      }
+    }
+
+    function dragEnd(e) {
+      isDragging = false;
+      playerHeader.style.cursor = 'move';
+      if (chatContainer) {
+        chatContainer.style.cursor = 'default';
+      }
+    }
+    
+    async function checkStreamStatus() {
+      try {
+        const statusUrl = window.STATUS_URL || STATUS_URL;
+        const response = await fetch(statusUrl);
+        const data = await response.json();
+        
+        if (data.icestats && data.icestats.source) {
+          const stream = Array.isArray(data.icestats.source) 
+            ? data.icestats.source[0] 
+            : data.icestats.source;
+          
+          if (stream && stream.listenurl && stream.listenurl.includes('/stream')) {
+            streamIsLive = true;
+            updateTrackInfo(stream.title || 'Live Radio Stream');
+            
+            if (!isPlaying) {
+              setTimeout(() => {
+                togglePlay();
+              }, 500);
+            }
+            
+            return true;
+          }
+        }
+        
+        streamIsLive = false;
+        if (isPlaying) {
+          stopStream();
+          document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
+          document.querySelector('.player-track').textContent = 'Stream ended';
+        } else {
+          document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
+        }
+        return false;
+      } catch (err) {
+        console.log('Stream not live yet');
+        streamIsLive = false;
+        if (!isPlaying) {
+          document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
+        }
+        return false;
+      }
+    }
+    
+    function updateTrackInfo(title) {
+      const trackElement = document.querySelector('.player-track');
+      if (title && title !== 'Live Radio Stream' && title !== 'unknown') {
+        trackElement.textContent = title;
+      } else {
+        trackElement.textContent = "No track info available";
+      }
+    }
+    
+    setInterval(async () => {
+      const wasLive = streamIsLive;
+      await checkStreamStatus();
+      
+      if (wasLive && !streamIsLive && isPlaying) {
+        stopStream();
+        document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
+        document.querySelector('.player-track').textContent = 'Stream ended';
+      }
+      
+      if (isPlaying && streamIsLive) {
+        try {
+          const statusUrl = window.STATUS_URL || STATUS_URL;
+        const response = await fetch(statusUrl);
+          const data = await response.json();
+          
+          if (data.icestats && data.icestats.source) {
+            const stream = Array.isArray(data.icestats.source) 
+              ? data.icestats.source[0] 
+              : data.icestats.source;
+            
+            if (stream && stream.title) {
+              updateTrackInfo(stream.title);
+            }
+          }
+        } catch (err) {
+          console.log('Could not fetch metadata');
+        }
+      }
+    }, 5000);
+    
+    checkStreamStatus();
+    
+    audio.addEventListener('loadstart', function() {
+      console.log('Stream loading...');
+      document.getElementById('playerStatus').innerHTML = '⏳ LOADING...';
+    });
+
+    audio.addEventListener('canplay', function() {
+      console.log('Stream ready to play');
+      if (isPlaying && streamIsLive) {
+        document.getElementById('playerStatus').innerHTML = '● LIVE';
+      }
+    });
+
+    audio.addEventListener('waiting', function() {
+      console.log('Stream buffering...');
+      if (streamIsLive) {
+        document.getElementById('playerStatus').innerHTML = '⏳ BUFFERING...';
+      }
+    });
+
+    audio.addEventListener('playing', function() {
+      if (streamIsLive) {
+        document.getElementById('playerStatus').innerHTML = '● LIVE';
+      }
+    });
+
+    audio.addEventListener('error', function(e) {
+      console.error('Stream error:', e);
+      document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
+      isPlaying = false;
+      playBtn.innerHTML = '▶';
+      setTimeout(() => {
+        checkStreamStatus();
+      }, 5000);
+    });
+    
+    function togglePlay() {
+      if (isPlaying) {
+        audio.pause();
+        playBtn.innerHTML = '▶';
+        document.getElementById('playerStatus').innerHTML = '⏸ PAUSED';
+        isPlaying = false;
+      } else {
+        if (!streamIsLive) {
+          document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
+          alert('Stream is currently offline');
+          return;
+        }
+        
+        audio.load();
+        const streamUrl = window.STREAM_URL || STREAM_URL;
+        audio.src = streamUrl;
+        
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            playBtn.innerHTML = '⏸';
+            document.getElementById('playerStatus').innerHTML = '● LIVE';
+            isPlaying = true;
+          }).catch(err => {
+            console.error('Play failed:', err);
+            document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
+            isPlaying = false;
+          });
+        }
+      }
+    }
+    
+    function stopStream() {
+      audio.pause();
+      audio.load();
+      playBtn.innerHTML = '▶';
+      isPlaying = false;
+      document.getElementById('playerStatus').innerHTML = '⏹ STOPPED';
+    }
+    
+    function changeVolume(val) {
+      audio.volume = val / 100;
+      document.getElementById('volumeDisplay').innerHTML = val;
+    }
+    
+    function toggleMinimize() {
+      isMinimized = !isMinimized;
+      const chatContainer = document.getElementById('chatContainer');
+      if (isMinimized) {
+        playerContent.style.display = 'none';
+        musicPlayer.style.height = '30px';
+        if (chatContainer) {
+          chatContainer.style.display = 'none';
+        }
+      } else {
+        playerContent.style.display = 'block';
+        musicPlayer.style.height = 'auto';
+        if (chatContainer) {
+          chatContainer.style.display = 'flex';
+        }
+      }
+    }
+    
+    // Ensure chat container is visible on page load (in case it was minimized)
+    window.addEventListener('DOMContentLoaded', function() {
+      const chatContainer = document.getElementById('chatContainer');
+      if (chatContainer && !isMinimized) {
+        chatContainer.style.display = 'flex';
+      }
+    });
+    
+    function previousTrack() {
+      stopStream();
+      setTimeout(() => togglePlay(), 500);
+    }
+    
+    function nextTrack() {
+      stopStream();
+      setTimeout(() => togglePlay(), 500);
+    }
+  </script>
+</body>
+</html>

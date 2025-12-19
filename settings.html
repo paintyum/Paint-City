@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PaintMusic - Settings</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
+  <link rel="shortcut icon" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="settings.js"></script>
+</head>
+<body>
+  <div class="settings-container">
+    <div class="settings-box">
+      <a href="index.html" class="back-link">← back to site</a>
+      
+      <h1>Settings</h1>
+      
+      <p>current username: <span id="currentUsername"></span></p>
+      
+      <button onclick="changeUsername()">change username</button>
+      <button onclick="changePassword()">change password</button>
+      <button onclick="updateNgrokUrl()" id="ngrokUrlBtn" style="display: none; background: #0066cc; color: #ffff00; padding: 10px 20px; border: 2px solid #00ffff; cursor: pointer; margin-top: 10px;">Update Radio Stream URL (Admin)</button>
+    </div>
+  </div>
+</body>
+</html>

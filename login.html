@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PaintMusic - Login</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
+  <link rel="shortcut icon" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="stylesheet" href="style.css">
+
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="login.js"></script>
+</head>
+
+<body class="login-body">
+  <div class="login-wrapper">
+    <div class="login-chuzzle-left">
+      <img src="chuzzle-side.gif" alt="chuzzles">
+    </div>
+
+    <div class="login-content">
+      <img src="login-logo.gif" alt="login" class="login-logo">
+      <p>login or join the chuzzle</p>
+
+      <input id="username" placeholder="username (new users only)">
+      <input id="email" type="email" placeholder="email">
+      <input id="password" type="password" placeholder="password">
+      <input id="confirmPassword" type="password" placeholder="confirm password (new users)">
+
+      <div class="button-group">
+        <button id="loginBtn">Login / Register</button>
+        <button id="resetBtn">Forgot Password?</button>
+      </div>
+
+      <div class="button-group-center">
+        <button id="homeBtn" onclick="window.location.href='index.html'">Home</button>
+      </div>
+
+      <p class="small">
+        returning users: leave username & confirm blank
+      </p>
+    </div>
+
+    <div class="login-chuzzle-right">
+      <img src="chuzzle-side.gif" alt="chuzzles">
+    </div>
+  </div>
+</body>
+</html>
