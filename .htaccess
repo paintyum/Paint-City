@@ -1,0 +1,20 @@
+# Enable URL rewriting
+RewriteEngine On
+
+# Redirect .html extensions to clean URLs
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^album-reviews$ index.html [L]
+RewriteRule ^personal-blog$ blog.html [L]
+RewriteRule ^interviews$ interviews.html [L]
+RewriteRule ^settings$ settings.html [L]
+RewriteRule ^login$ login.html [L]
+RewriteRule ^chat$ chat.html [L]
+
+# Redirect old .html URLs to clean URLs
+RewriteCond %{THE_REQUEST} /([^.]+)\.html [NC]
+RewriteRule ^ /%1? [NC,L,R=301]
+
+# If accessing root, serve index.html
+DirectoryIndex index.html
+

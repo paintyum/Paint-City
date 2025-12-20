@@ -1,0 +1,16 @@
+# Netlify redirects file
+/album-reviews    /index.html    200
+/personal-blog    /blog.html     200
+/interviews       /interviews.html   200
+/settings         /settings.html  200
+/login            /login.html     200
+/chat             /chat.html      200
+
+# Redirect old .html URLs to clean URLs
+/index.html       /album-reviews   301
+/blog.html        /personal-blog  301
+/interviews.html  /interviews     301
+/settings.html    /settings       301
+/login.html       /login          301
+/chat.html        /chat           301
+

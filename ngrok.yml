@@ -1,0 +1,18 @@
+version: "2"
+# ngrok configuration file
+# Simplified config - bypass is handled in code automatically
+# Restart ngrok with: ngrok.exe http 8000 --config %APPDATA%\ngrok\ngrok.yml
+#
+# IMPORTANT: You need to add your authtoken!
+# Get it from: https://dashboard.ngrok.com/get-started/your-authtoken
+# Then run: ngrok config add-authtoken YOUR_TOKEN_HERE
+# Or add it manually below (uncomment and add your token):
+
+# authtoken: YOUR_AUTHTOKEN_HERE
+
+tunnels:
+  web:
+    proto: http
+    addr: 8000
+    inspect: false
+

@@ -1,0 +1,19 @@
+{
+  "rewrites": [
+    { "source": "/album-reviews", "destination": "/index.html" },
+    { "source": "/personal-blog", "destination": "/blog.html" },
+    { "source": "/interviews", "destination": "/interviews.html" },
+    { "source": "/settings", "destination": "/settings.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/chat", "destination": "/chat.html" }
+  ],
+  "redirects": [
+    { "source": "/index.html", "destination": "/album-reviews", "permanent": true },
+    { "source": "/blog.html", "destination": "/personal-blog", "permanent": true },
+    { "source": "/interviews.html", "destination": "/interviews", "permanent": true },
+    { "source": "/settings.html", "destination": "/settings", "permanent": true },
+    { "source": "/login.html", "destination": "/login", "permanent": true },
+    { "source": "/chat.html", "destination": "/chat", "permanent": true }
+  ]
+}
+

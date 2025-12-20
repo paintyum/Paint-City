@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+  <base href="/">
+  <script>
+    // Client-side routing for GitHub Pages clean URLs
+    // This file is served by GitHub Pages when a 404 occurs
+    
+    const routes = {
+      '/album-reviews': '/index.html',
+      '/personal-blog': '/blog.html',
+      '/interviews': '/interviews.html',
+      '/settings': '/settings.html',
+      '/login': '/login.html',
+      '/chat': '/chat.html',
+      '/': '/index.html'
+    };
+
+    // Get the current path
+    const path = window.location.pathname;
+    
+    // Remove trailing slash for matching
+    const cleanPath = path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
+    
+    // Check if we have a route for this path
+    if (routes[cleanPath]) {
+      // Redirect to the actual file
+      window.location.replace(routes[cleanPath]);
+    } else if (routes[path]) {
+      // Try with original path
+      window.location.replace(routes[path]);
+    } else {
+      // If no route found, redirect to home
+      window.location.replace('/index.html');
+    }
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background: #000;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <p>Redirecting...</p>
+  <script>
+    // Fallback in case JavaScript is disabled
+    setTimeout(function() {
+      window.location.replace('/index.html');
+    }, 1000);
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,4 @@
+# This file tells GitHub Pages to NOT use Jekyll
+# This is important for sites that don't need Jekyll processing
+# and want to serve files as-is
+

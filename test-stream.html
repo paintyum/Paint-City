@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stream Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    .success { background: #2d5016; }
+    .error { background: #501616; }
+    .info { background: #163250; }
+    audio { width: 100%; margin: 20px 0; }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px 5px;
+      cursor: pointer;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    button:hover { background: #45a049; }
+  </style>
+</head>
+<body>
+  <h1>Radio Stream Test</h1>
+  
+  <div id="status" class="status info">Testing connection...</div>
+  
+  <div>
+    <h2>Test Steps:</h2>
+    <ol>
+      <li>Click the button below to bypass ngrok warning</li>
+      <li>If you see a warning page, click "Visit Site"</li>
+      <li>The audio player should appear below</li>
+    </ol>
+  </div>
+  
+  <button onclick="testBypass()">Bypass ngrok Warning</button>
+  <button onclick="testStream()">Test Stream Directly</button>
+  
+  <div id="audioContainer"></div>
+  
+  <script>
+    const NGROK_URL = 'https://kam-budless-gael.ngrok-free.dev';
+    const STREAM_URL = NGROK_URL + '/stream';
+    
+    function updateStatus(message, type) {
+      const status = document.getElementById('status');
+      status.textContent = message;
+      status.className = 'status ' + type;
+    }
+    
+    async function testBypass() {
+      updateStatus('Attempting to bypass ngrok warning...', 'info');
+      
+      // Method 1: Open in new window (user can click "Visit Site")
+      const win = window.open(NGROK_URL, '_blank');
+      
+      // Method 2: Hidden iframe
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.style.width = '1px';
+      iframe.style.height = '1px';
+      iframe.src = NGROK_URL;
+      document.body.appendChild(iframe);
+      
+      // Method 3: Fetch with headers
+      try {
+        await fetch(NGROK_URL, {
+          method: 'GET',
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          mode: 'no-cors'
+        });
+        updateStatus('Bypass attempt completed. Check the new window and click "Visit Site" if needed.', 'info');
+      } catch (e) {
+        updateStatus('Bypass attempt completed (errors are normal). Check the new window.', 'info');
+      }
+      
+      setTimeout(() => {
+        updateStatus('Now try testing the stream below...', 'info');
+      }, 2000);
+    }
+    
+    async function testStream() {
+      updateStatus('Testing stream connection...', 'info');
+      
+      // Try HEAD request first
+      try {
+        const response = await fetch(STREAM_URL, {
+          method: 'HEAD',
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          mode: 'no-cors'
+        });
+        updateStatus('Stream is accessible! Loading audio player...', 'success');
+      } catch (e) {
+        updateStatus('HEAD request failed (this is normal). Trying audio element...', 'info');
+      }
+      
+      // Create audio element
+      const container = document.getElementById('audioContainer');
+      container.innerHTML = '<audio controls autoplay><source src="' + STREAM_URL + '" type="audio/mpeg">Your browser does not support the audio element.</audio>';
+      
+      const audio = container.querySelector('audio');
+      
+      audio.addEventListener('loadstart', () => {
+        updateStatus('Audio loading started...', 'info');
+      });
+      
+      audio.addEventListener('canplay', () => {
+        updateStatus('✅ Stream is working! Audio is ready to play.', 'success');
+      });
+      
+      audio.addEventListener('error', (e) => {
+        updateStatus('❌ Error loading stream. Make sure you clicked "Visit Site" on the ngrok warning page first.', 'error');
+        console.error('Audio error:', e);
+      });
+      
+      audio.addEventListener('stalled', () => {
+        updateStatus('Stream stalled. This might be normal if nothing is broadcasting.', 'info');
+      });
+      
+      // Try to play
+      audio.play().catch(e => {
+        updateStatus('Autoplay blocked. Click play manually. If you see an error, visit ' + NGROK_URL + ' first and click "Visit Site".', 'info');
+      });
+    }
+    
+    // Auto-test on load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        updateStatus('Ready to test. Click "Bypass ngrok Warning" first, then "Test Stream Directly".', 'info');
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
+

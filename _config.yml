@@ -1,0 +1,29 @@
+# Jekyll configuration for GitHub Pages
+# This file enables Jekyll processing but we'll keep it minimal
+
+# Exclude files from Jekyll processing (important for Firebase and other JS files)
+exclude:
+  - node_modules
+  - .git
+  - .gitignore
+  - README.md
+  - package.json
+  - package-lock.json
+
+# Include all files (don't exclude anything by default)
+include:
+  - _redirects
+  - .htaccess
+
+# Disable Jekyll processing for most files (they're already static)
+safe: true
+
+# Don't process markdown files
+markdown: kramdown
+
+# Don't use plugins (we don't need them)
+plugins: []
+
+# Set baseurl if your site is in a subdirectory
+# baseurl: "" # Leave empty if site is at root
+
