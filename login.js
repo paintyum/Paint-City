@@ -112,6 +112,8 @@ loginBtn.onclick = async () => {
       await setDoc(doc(db, "users", userCred.user.uid), {
         username: username,
         points: 0,
+        messageCount: 0,
+        level: 1,
         created: Date.now(),
         lastActive: Date.now()
       });

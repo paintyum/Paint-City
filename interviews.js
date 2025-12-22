@@ -1,6 +1,7 @@
 import { db, auth } from './firebase.js';
 import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { escapeHtml, escapeHtmlAttr, escapeJs } from './xss-utils.js';
 
 let currentUserIsAdmin = false;
 
@@ -40,8 +41,15 @@ onSnapshot(q, (snapshot) => {
     const interview = docSnap.data();
     const interviewId = docSnap.id;
     
+    // Escape all user input to prevent XSS
+    const escapedInterviewId = escapeJs(interviewId || '');
+    const escapedTitle = escapeHtml(interview.title || '');
+    const escapedTitleAttr = escapeHtmlAttr(interview.title || '');
+    const escapedYoutubeId = escapeHtmlAttr(interview.youtubeId || '');
+    const escapedDescription = interview.description ? escapeHtml(interview.description) : '';
+    
     const deleteBtn = currentUserIsAdmin ? 
-      `<button onclick="deleteInterview('${interviewId}')" class="delete-interview-btn">Delete Interview</button>` : '';
+      `<button onclick="deleteInterview('${escapedInterviewId}')" class="delete-interview-btn">Delete Interview</button>` : '';
     
     // Format date
     const postDate = new Date(interview.timestamp);
@@ -53,20 +61,20 @@ onSnapshot(q, (snapshot) => {
 
     interviewsContainer.innerHTML += `
       <div class="interview-item">
-        <h3>${interview.title}</h3>
-        <div class="interview-date">Posted: ${dateString}</div>
+        <h3>${escapedTitle}</h3>
+        <div class="interview-date">Posted: ${escapeHtml(dateString)}</div>
         
         <div class="youtube-embed">
           <iframe width="100%" height="450" 
-            src="https://www.youtube.com/embed/${interview.youtubeId}" 
-            title="${interview.title}"
+            src="https://www.youtube.com/embed/${escapedYoutubeId}" 
+            title="${escapedTitleAttr}"
             frameborder="0" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
             allowfullscreen>
           </iframe>
         </div>
         
-        ${interview.description ? `<p class="interview-description">${interview.description}</p>` : ''}
+        ${escapedDescription ? `<p class="interview-description">${escapedDescription}</p>` : ''}
         ${deleteBtn}
       </div>
     `;

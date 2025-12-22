@@ -7,6 +7,11 @@
   <link rel="shortcut icon" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
   <link rel="stylesheet" href="style.css">
+  <!-- Security Headers -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; font-src 'self' data:; connect-src 'self' https://www.googleapis.com https://*.googleapis.com https://*.firebaseio.com https://*.firebase.com wss://*.firebaseio.com https://kam-budless-gael.ngrok-free.dev; frame-src https://www.youtube.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 </head>
 <body>
   <div class="wrapper-retro">
@@ -122,6 +127,7 @@
         <div class="chat-header">
           <span>CHATROOM</span>
           <div>
+            <button onclick="openShopModal()" style="background: #0066cc; color: #ffff00; padding: 5px 10px; border: 2px solid #00ffff; cursor: pointer; font-size: 11px; margin-left: 10px;">SHOP</button>
             <button id="untimeoutBtn" onclick="showUntimeoutModal()" style="display: none; background: #00ff00; color: #000; padding: 5px 10px; border: none; cursor: pointer; font-size: 11px; margin-left: 10px;">Untimeout</button>
             <button id="unbanBtn" onclick="showUnbanModal()" style="display: none; background: #ffaa00; color: #000; padding: 5px 10px; border: none; cursor: pointer; font-size: 11px; margin-left: 10px;">Unban</button>
           </div>
@@ -129,8 +135,18 @@
         <div class="chat-messages" id="chatMessages"></div>
         <div class="chat-login-message" id="loginMessage">Please log in to chat</div>
         <div class="chat-input-container" id="chatInputContainer" style="display: none;">
+          <button id="gifPickerBtn" onclick="openGifPicker('chat')">GIF</button>
           <input type="text" id="chatInput" class="chat-input" placeholder="Type your message...">
           <button onclick="sendMessage()" class="chat-send-btn">Send</button>
+        </div>
+        <div class="xp-bar-container" id="xpBarContainer" style="display: none;">
+          <div class="xp-bar-info">
+            <span class="xp-level-text" id="xpLevelText">LV 1</span>
+            <span class="xp-progress-text" id="xpProgressText">0 / 100 messages</span>
+          </div>
+          <div class="xp-bar-wrapper">
+            <div class="xp-bar-fill" id="xpBarFill" style="width: 0%;"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -162,6 +178,8 @@
   <audio id="radioStream" preload="auto"></audio>
 
   <script type="module" src="chat.js"></script>
+  <script type="module" src="shop-modal.js"></script>
+  <script type="module" src="gif-picker.js"></script>
 
   <script>
     const audio = document.getElementById('radioStream');
@@ -322,6 +340,23 @@
       chatContainer.style.display = 'flex';
     }
 
+    // Set default centered position if no saved position exists
+    const savedLeft = localStorage.getItem('radioChatWrapperLeft');
+    const savedTop = localStorage.getItem('radioChatWrapperTop');
+    if (!savedLeft || !savedTop) {
+      // Center the radio vertically and horizontally on page load
+      const centerX = window.innerWidth / 2 - 250; // 250 is half of 500px width
+      const centerY = window.innerHeight / 2 - 200; // Approximate center (adjust as needed)
+      radioChatWrapper.style.setProperty('left', centerX + 'px', 'important');
+      radioChatWrapper.style.setProperty('top', centerY + 'px', 'important');
+      radioChatWrapper.style.setProperty('position', 'absolute', 'important');
+    } else {
+      // Load saved position
+      radioChatWrapper.style.setProperty('left', savedLeft, 'important');
+      radioChatWrapper.style.setProperty('top', savedTop, 'important');
+      radioChatWrapper.style.setProperty('position', 'absolute', 'important');
+    }
+
     // Make both header and chat container draggable
     playerHeader.addEventListener('mousedown', dragStart);
     if (chatContainer) {
@@ -340,10 +375,14 @@
         return;
       }
       
-      // Get current position of the wrapper
+      // Get current position relative to document
       const rect = radioChatWrapper.getBoundingClientRect();
-      initialX = e.clientX - rect.left;
-      initialY = e.clientY - rect.top;
+      const scrollX = window.scrollX || window.pageXOffset;
+      const scrollY = window.scrollY || window.pageYOffset;
+      const currentLeft = rect.left + scrollX;
+      const currentTop = rect.top + scrollY;
+      initialX = e.clientX - currentLeft;
+      initialY = e.clientY - currentTop;
       isDragging = true;
       
       if (e.target.closest('#playerHeader')) {
@@ -358,19 +397,28 @@
       if (isDragging) {
         e.preventDefault();
         
-        // Calculate new position
-        currentX = e.clientX - initialX;
-        currentY = e.clientY - initialY;
+        // Calculate new position relative to document
+        currentX = e.clientX - initialX + window.scrollX;
+        currentY = e.clientY - initialY + window.scrollY;
         
-        // Update position - use fixed positioning
-        radioChatWrapper.style.left = currentX + 'px';
-        radioChatWrapper.style.top = currentY + 'px';
-        radioChatWrapper.style.bottom = 'auto';
-        radioChatWrapper.style.transform = 'none';
+        // Update position - use absolute positioning relative to document
+        radioChatWrapper.style.setProperty('left', currentX + 'px', 'important');
+        radioChatWrapper.style.setProperty('top', currentY + 'px', 'important');
+        radioChatWrapper.style.setProperty('position', 'absolute', 'important');
       }
     }
 
     function dragEnd(e) {
+      if (isDragging) {
+        // Store final position relative to document
+        const finalX = e.clientX - initialX + window.scrollX;
+        const finalY = e.clientY - initialY + window.scrollY;
+        radioChatWrapper.style.setProperty('left', finalX + 'px', 'important');
+        radioChatWrapper.style.setProperty('top', finalY + 'px', 'important');
+        // Save position to localStorage
+        localStorage.setItem('radioChatWrapperLeft', finalX + 'px');
+        localStorage.setItem('radioChatWrapperTop', finalY + 'px');
+      }
       isDragging = false;
       playerHeader.style.cursor = 'move';
       if (chatContainer) {
@@ -379,88 +427,158 @@
     }
     
     async function checkStreamStatus() {
+      // CORS prevents fetch requests, so we rely entirely on audio element events
+      // HTML5 audio can play streams even with CORS errors
+      const streamUrl = window.STREAM_URL || STREAM_URL;
+      
+      // Ensure audio source is set
+      if (streamUrl && (!audio.src || audio.src !== streamUrl)) {
+        audio.src = streamUrl;
+        console.log('Audio source set to:', streamUrl);
+      }
+      
+      // Check audio element state to determine if stream is live
+      // If audio is playing or ready, stream is likely live
+      if (!audio.paused && !audio.ended && audio.readyState >= 2) {
+        if (!streamIsLive) {
+          streamIsLive = true;
+          document.getElementById('playerStatus').innerHTML = '● LIVE';
+          console.log('Stream detected as LIVE (audio playing)');
+        }
+        return true;
+      }
+      
+      return streamIsLive;
+    }
+    
+    function updateTrackInfo(title) {
+      const trackElement = document.querySelector('.player-track');
+      if (trackElement) {
+        if (title && title.trim() && title !== 'Live Radio Stream' && title !== 'unknown' && title.trim() !== '') {
+          trackElement.textContent = title.trim();
+        } else {
+          // Don't change to "No track info available" if we already have a song name
+          if (trackElement.textContent === 'Waiting for stream...' || !trackElement.textContent || trackElement.textContent.trim() === '') {
+            trackElement.textContent = "No track info available";
+          }
+        }
+      }
+    }
+    
+    // Fetch track info immediately
+    async function fetchTrackInfo() {
+      const statusUrl = window.STATUS_URL || STATUS_URL;
+      if (!statusUrl) {
+        console.log('[Track Info] No STATUS_URL available');
+        return;
+      }
+      
       try {
-        const statusUrl = window.STATUS_URL || STATUS_URL;
-        const response = await fetch(statusUrl);
+        console.log('[Track Info] Fetching from:', statusUrl);
+        // Use simple request to avoid preflight OPTIONS check
+        // Simple requests don't trigger preflight if they don't have custom headers
+        const response = await fetch(statusUrl + '?nocache=' + Date.now(), {
+          method: 'GET',
+          cache: 'no-cache',
+          mode: 'cors'
+        });
+        
+        console.log('[Track Info] Response status:', response.status, response.statusText);
+        
+        if (!response.ok) {
+          console.log('[Track Info] Response not OK:', response.status);
+          return;
+        }
+        
         const data = await response.json();
+        console.log('[Track Info] Received data:', data);
         
         if (data.icestats && data.icestats.source) {
           const stream = Array.isArray(data.icestats.source) 
             ? data.icestats.source[0] 
             : data.icestats.source;
           
-          if (stream && stream.listenurl && stream.listenurl.includes('/stream')) {
-            streamIsLive = true;
-            updateTrackInfo(stream.title || 'Live Radio Stream');
+          console.log('[Track Info] Stream object:', stream);
+          
+          if (stream) {
+            // Try multiple possible fields for track title
+            let trackTitle = null;
             
-            if (!isPlaying) {
-              setTimeout(() => {
-                togglePlay();
-              }, 500);
+            if (stream.title && stream.title.trim()) {
+              trackTitle = stream.title.trim();
+            } else if (stream.yp_currently_playing && stream.yp_currently_playing.trim()) {
+              trackTitle = stream.yp_currently_playing.trim();
+            } else if (stream.server_name) {
+              trackTitle = stream.server_name;
             }
             
-            return true;
+            console.log('[Track Info] Found track title:', trackTitle);
+            
+            if (trackTitle && trackTitle !== lastTrackTitle) {
+              console.log('[Track Info] Updating to:', trackTitle);
+              lastTrackTitle = trackTitle;
+              updateTrackInfo(trackTitle);
+            } else if (!trackTitle) {
+              console.log('[Track Info] No track title found in stream data');
+            }
+          } else {
+            console.log('[Track Info] No stream object found');
           }
+        } else {
+          console.log('[Track Info] No icestats.source found in response');
+        }
+      } catch (err) {
+        // Log the actual error for debugging
+        console.error('[Track Info] Fetch error:', err);
+        console.error('[Track Info] Error details:', {
+          message: err.message,
+          name: err.name,
+          stack: err.stack
+        });
+        
+        // Only show error message once to avoid spam
+        if (!window.trackInfoErrorLogged) {
+          console.log('[Track Info] CORS or network error - check if Icecast CORS headers are configured');
+          window.trackInfoErrorLogged = true;
         }
         
-        streamIsLive = false;
-        if (isPlaying) {
-          stopStream();
-          document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
-          document.querySelector('.player-track').textContent = 'Stream ended';
-        } else {
-          document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
+        // Clear "Loading track info..." if we hit an error
+        const trackEl = document.querySelector('.player-track');
+        if (trackEl && trackEl.textContent === 'Loading track info...') {
+          trackEl.textContent = 'Track info unavailable';
         }
-        return false;
-      } catch (err) {
-        console.log('Stream not live yet');
-        streamIsLive = false;
-        if (!isPlaying) {
-          document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
-        }
-        return false;
       }
     }
     
-    function updateTrackInfo(title) {
-      const trackElement = document.querySelector('.player-track');
-      if (title && title !== 'Live Radio Stream' && title !== 'unknown') {
-        trackElement.textContent = title;
-      } else {
-        trackElement.textContent = "No track info available";
-      }
-    }
+    let lastTrackTitle = '';
     
+    // Real-time status and track info updates - check every 2 seconds
     setInterval(async () => {
       const wasLive = streamIsLive;
       await checkStreamStatus();
       
-      if (wasLive && !streamIsLive && isPlaying) {
-        stopStream();
+      // Update status display based on audio state
+      if (audio.readyState >= 2 && !audio.paused && !audio.ended) {
+        streamIsLive = true;
+        if (isPlaying) {
+          document.getElementById('playerStatus').innerHTML = '● LIVE';
+        } else if (streamIsLive) {
+          document.getElementById('playerStatus').innerHTML = '● LIVE';
+        }
+      } else if (audio.error || (audio.readyState === 0 && wasLive)) {
+        streamIsLive = false;
+        if (isPlaying) {
+          stopStream();
+        }
         document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
-        document.querySelector('.player-track').textContent = 'Stream ended';
+        document.querySelector('.player-track').textContent = 'Stream offline';
       }
       
-      if (isPlaying && streamIsLive) {
-        try {
-          const statusUrl = window.STATUS_URL || STATUS_URL;
-        const response = await fetch(statusUrl);
-          const data = await response.json();
-          
-          if (data.icestats && data.icestats.source) {
-            const stream = Array.isArray(data.icestats.source) 
-              ? data.icestats.source[0] 
-              : data.icestats.source;
-            
-            if (stream && stream.title) {
-              updateTrackInfo(stream.title);
-            }
-          }
-        } catch (err) {
-          console.log('Could not fetch metadata');
-        }
+      // Always try to fetch track info when stream is live or playing
+      if (streamIsLive || isPlaying || (!audio.paused && !audio.ended)) {
+        fetchTrackInfo();
       }
-    }, 5000);
+    }, 2000);
     
     checkStreamStatus();
     
@@ -471,7 +589,17 @@
 
     audio.addEventListener('canplay', function() {
       console.log('Stream ready to play');
-      if (isPlaying && streamIsLive) {
+      streamIsLive = true;
+      const statusEl = document.getElementById('playerStatus');
+      if (statusEl) statusEl.innerHTML = '● LIVE';
+      // Try to fetch track info when stream is ready
+      fetchTrackInfo();
+    });
+    
+    audio.addEventListener('loadedmetadata', function() {
+      console.log('Stream metadata loaded');
+      streamIsLive = true;
+      if (isPlaying) {
         document.getElementById('playerStatus').innerHTML = '● LIVE';
       }
     });
@@ -484,19 +612,29 @@
     });
 
     audio.addEventListener('playing', function() {
-      if (streamIsLive) {
-        document.getElementById('playerStatus').innerHTML = '● LIVE';
-      }
+      streamIsLive = true;
+      document.getElementById('playerStatus').innerHTML = '● LIVE';
+      isPlaying = true;
+      playBtn.innerHTML = '⏸';
     });
 
     audio.addEventListener('error', function(e) {
       console.error('Stream error:', e);
-      document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
-      isPlaying = false;
-      playBtn.innerHTML = '▶';
-      setTimeout(() => {
-        checkStreamStatus();
-      }, 5000);
+      // Don't immediately mark as offline - might be temporary
+      // Only mark offline if error persists
+      if (audio.error && audio.error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+        document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
+        streamIsLive = false;
+        isPlaying = false;
+        playBtn.innerHTML = '▶';
+      } else {
+        // Try to reload after a delay
+        setTimeout(() => {
+          if (!isPlaying) {
+            audio.load();
+          }
+        }, 3000);
+      }
     });
     
     function togglePlay() {
@@ -506,26 +644,40 @@
         document.getElementById('playerStatus').innerHTML = '⏸ PAUSED';
         isPlaying = false;
       } else {
-        if (!streamIsLive) {
-          document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
-          alert('Stream is currently offline');
-          return;
+        const streamUrl = window.STREAM_URL || STREAM_URL;
+        
+        // Set audio source - HTML5 audio can play streams even with CORS issues
+        if (!audio.src || audio.src !== streamUrl) {
+          audio.src = streamUrl;
+          console.log('Setting audio source:', streamUrl);
         }
         
-        audio.load();
-        const streamUrl = window.STREAM_URL || STREAM_URL;
-        audio.src = streamUrl;
+        // Try to play - audio element works even with CORS errors
+        const statusEl = document.getElementById('playerStatus');
+        if (statusEl) statusEl.innerHTML = '⏳ LOADING...';
         
         const playPromise = audio.play();
         if (playPromise !== undefined) {
           playPromise.then(() => {
-            playBtn.innerHTML = '⏸';
-            document.getElementById('playerStatus').innerHTML = '● LIVE';
+            streamIsLive = true;
             isPlaying = true;
+            if (playBtn) playBtn.innerHTML = '⏸';
+            if (statusEl) statusEl.innerHTML = '● LIVE';
+            console.log('Playback started successfully');
+            // Clear "Waiting for stream..." and fetch track info immediately
+            const trackEl = document.querySelector('.player-track');
+            if (trackEl && trackEl.textContent === 'Waiting for stream...') {
+              trackEl.textContent = 'Loading track info...';
+            }
+            // Fetch track info immediately when play succeeds
+            setTimeout(() => fetchTrackInfo(), 500);
           }).catch(err => {
             console.error('Play failed:', err);
-            document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
+            streamIsLive = false;
             isPlaying = false;
+            if (statusEl) statusEl.innerHTML = '⚫ OFFLINE';
+            const trackEl = document.querySelector('.player-track');
+            if (trackEl) trackEl.textContent = 'Stream offline';
           });
         }
       }
@@ -534,9 +686,13 @@
     function stopStream() {
       audio.pause();
       audio.load();
-      playBtn.innerHTML = '▶';
+      streamIsLive = false;
       isPlaying = false;
-      document.getElementById('playerStatus').innerHTML = '⏹ STOPPED';
+      if (playBtn) playBtn.innerHTML = '▶';
+      const statusEl = document.getElementById('playerStatus');
+      if (statusEl) statusEl.innerHTML = '⚫ OFFLINE';
+      const trackEl = document.querySelector('.player-track');
+      if (trackEl) trackEl.textContent = 'Stream stopped';
     }
     
     function changeVolume(val) {

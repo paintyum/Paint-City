@@ -1,6 +1,8 @@
 import { db, auth } from './firebase.js';
 import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { escapeHtml, escapeHtmlAttr, escapeJs } from './xss-utils.js';
+import { validateImageFile, sanitizeImageDataUrl } from './image-security.js';
 
 let currentUserIsAdmin = false;
 
@@ -40,8 +42,13 @@ onSnapshot(q, (snapshot) => {
     const post = docSnap.data();
     const postId = docSnap.id;
     
+    // Escape all user input to prevent XSS
+    const escapedPostId = escapeJs(postId || '');
+    const escapedContent = escapeHtml(post.content || '');
+    const escapedImageUrl = post.imageUrl ? escapeHtmlAttr(post.imageUrl) : null;
+    
     const deleteBtn = currentUserIsAdmin ? 
-      `<button onclick="deletePost('${postId}')" class="delete-post-btn">Delete</button>` : '';
+      `<button onclick="deletePost('${escapedPostId}')" class="delete-post-btn">Delete</button>` : '';
     
     const postDate = new Date(post.timestamp);
     const dateString = postDate.toLocaleDateString('en-US', { 
@@ -55,16 +62,16 @@ onSnapshot(q, (snapshot) => {
       hour12: true 
     });
     
-    const imageHtml = post.imageUrl ? 
-      `<img src="${post.imageUrl}" alt="Post image" class="blog-post-image">` : '';
+    const imageHtml = escapedImageUrl ? 
+      `<img src="${escapedImageUrl}" alt="Post image" class="blog-post-image">` : '';
     
     postsContainer.innerHTML += `
       <div class="blog-post">
         <div class="post-header">
-          <div class="post-date">${dateString} at ${timeString}</div>
+          <div class="post-date">${escapeHtml(dateString)} at ${escapeHtml(timeString)}</div>
           ${deleteBtn}
         </div>
-        <div class="post-content">${post.content}</div>
+        <div class="post-content">${escapedContent}</div>
         ${imageHtml}
       </div>
     `;
@@ -98,10 +105,31 @@ window.previewPostImage = function(event) {
   const preview = document.getElementById('postImagePreview');
   
   if (file) {
+    // Validate image file before processing
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      alert(validation.error);
+      event.target.value = ''; // Clear the input
+      if (preview) {
+        preview.style.display = 'none';
+        preview.src = '';
+      }
+      return;
+    }
+    
     const reader = new FileReader();
     reader.onload = function(e) {
-      preview.src = e.target.result;
-      preview.style.display = 'block';
+      // Sanitize the data URL before using it
+      const sanitizedUrl = sanitizeImageDataUrl(e.target.result);
+      if (sanitizedUrl) {
+        preview.src = sanitizedUrl;
+        preview.style.display = 'block';
+      } else {
+        alert('Invalid image file');
+        event.target.value = '';
+        preview.style.display = 'none';
+        preview.src = '';
+      }
     };
     reader.readAsDataURL(file);
   } else {
@@ -132,9 +160,22 @@ window.submitNewPost = async function() {
   };
   
   if (imageFile) {
+    // Validate image file before processing
+    const validation = validateImageFile(imageFile);
+    if (!validation.valid) {
+      alert(validation.error);
+      return;
+    }
+    
     const reader = new FileReader();
     reader.onload = async function(e) {
-      postData.imageUrl = e.target.result;
+      // Sanitize the data URL before storing
+      const sanitizedUrl = sanitizeImageDataUrl(e.target.result);
+      if (!sanitizedUrl) {
+        alert('Invalid image file. Please try a different image.');
+        return;
+      }
+      postData.imageUrl = sanitizedUrl;
       await addDoc(postsRef, postData);
       hideNewPostForm();
       alert('Post created!');

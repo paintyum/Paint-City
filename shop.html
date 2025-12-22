@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop - Paintyum</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <!-- Security Headers -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; font-src 'self' data:; connect-src 'self' https://www.googleapis.com https://*.googleapis.com https://*.firebaseio.com https://*.firebase.com wss://*.firebaseio.com https://kam-budless-gael.ngrok-free.dev; frame-src https://www.youtube.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <nav>
+        <a href="/album-reviews">ALBUM REVIEWS</a>
+        <a href="/personal-blog">PERSONAL BLOG</a>
+        <a href="/interviews">INTERVIEWS</a>
+        <a href="/shop" style="color: #ffff00;">SHOP</a>
+        <div id="userLink"></div>
+      </nav>
+    </header>
+
+    <main>
+      <h1 style="color: #00ffff; text-align: center; margin: 20px 0;">SHOP</h1>
+      
+      <div id="userPoints" style="color: #ffff00; text-align: center; font-size: 18px; font-weight: bold; margin: 20px 0;">
+        Your Points: 0
+      </div>
+      
+      <!-- Admin/Mod Controls -->
+      <div id="adminShopControls" style="display: none; margin: 20px 0; padding: 15px; border: 2px solid #0066cc; background: rgba(0, 0, 0, 0.5);">
+        <h3 style="color: #00ffff; margin-top: 0;">Admin/Mod Controls</h3>
+        <button onclick="addShopItem()" style="background: #0066cc; color: #ffff00; padding: 10px 20px; border: 2px solid #00ffff; cursor: pointer; margin-right: 10px; font-weight: bold;">Add Item to Shop</button>
+        <button onclick="giveShopItemFree()" style="background: #00ff00; color: #000; padding: 10px 20px; border: 2px solid #00ffff; cursor: pointer; font-weight: bold;">Give Item for Free (Admin Only)</button>
+      </div>
+      
+      <!-- Shop Items Container -->
+      <div id="shopItems" style="margin: 20px 0;">
+        <div style="color: #666; padding: 20px; text-align: center;">Loading shop items...</div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="userbar.js"></script>
+  <script type="module" src="shop.js"></script>
+  <script type="module" src="router.js"></script>
+</body>
+</html>

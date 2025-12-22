@@ -1,18 +1,27 @@
 version: "2"
 # ngrok configuration file
-# Simplified config - bypass is handled in code automatically
-# Restart ngrok with: ngrok.exe http 8000 --config %APPDATA%\ngrok\ngrok.yml
+# CORS headers added to allow access from your website
+# 
+# IMPORTANT NOTES:
+# 1. Response headers require ngrok paid plan (Hobby or higher)
+# 2. For free ngrok, configure Icecast instead (see ICECAST_CORS_FIX.md)
+# 3. Copy this file to: %LOCALAPPDATA%\ngrok\ngrok.yml
+# 4. Then restart ngrok with: ngrok.exe http 8000 --config %LOCALAPPDATA%\ngrok\ngrok.yml
 #
 # IMPORTANT: You need to add your authtoken!
 # Get it from: https://dashboard.ngrok.com/get-started/your-authtoken
 # Then run: ngrok config add-authtoken YOUR_TOKEN_HERE
-# Or add it manually below (uncomment and add your token):
-
-# authtoken: YOUR_AUTHTOKEN_HERE
 
 tunnels:
   web:
     proto: http
     addr: 8000
     inspect: false
+    # NOTE: CORS headers are configured in Icecast instead
+    # If you want to use ngrok headers instead, uncomment below and remove from Icecast
+    # response_headers:
+    #   Access-Control-Allow-Origin: "*"  # Use "*" for development, "https://paintyum.com" for production
+    #   Access-Control-Allow-Methods: "GET, POST, OPTIONS, HEAD"
+    #   Access-Control-Allow-Headers: "Content-Type, X-Requested-With, ngrok-skip-browser-warning"
+    #   Access-Control-Max-Age: "86400"
 

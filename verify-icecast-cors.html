@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Icecast CORS Headers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #2d5a2d;
+            border: 2px solid #4caf50;
+        }
+        .error {
+            background: #5a2d2d;
+            border: 2px solid #f44336;
+        }
+        .info {
+            background: #2d3a5a;
+            border: 2px solid #2196f3;
+        }
+        button {
+            background: #0066cc;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0088ff;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #333;
+            color: #fff;
+            border: 2px solid #0066cc;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        pre {
+            background: #000;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Icecast CORS Headers</h1>
+    <p>Enter your ngrok URL to test if CORS headers are configured correctly.</p>
+    
+    <input type="text" id="ngrokUrl" placeholder="https://your-ngrok-url.ngrok-free.dev" value="https://kam-budless-gael.ngrok-free.dev">
+    <br>
+    <button onclick="testCORS()">Test CORS Headers</button>
+    <button onclick="testFetch()">Test Fetch Request</button>
+    
+    <div id="results"></div>
+
+    <script>
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testCORS() {
+            clearResults();
+            const ngrokUrl = document.getElementById('ngrokUrl').value.trim();
+            
+            if (!ngrokUrl) {
+                addResult('Please enter your ngrok URL', 'error');
+                return;
+            }
+
+            const statusUrl = `${ngrokUrl}/status-json.xsl`;
+            addResult(`Testing: ${statusUrl}`, 'info');
+
+            try {
+                // Try to fetch and check headers
+                const response = await fetch(statusUrl, {
+                    method: 'GET',
+                    cache: 'no-cache'
+                });
+
+                addResult(`✅ Fetch succeeded! Status: ${response.status}`, 'success');
+                
+                // Check headers
+                const corsOrigin = response.headers.get('Access-Control-Allow-Origin');
+                const corsMethods = response.headers.get('Access-Control-Allow-Methods');
+                const corsHeaders = response.headers.get('Access-Control-Allow-Headers');
+
+                let headerInfo = '<h3>Response Headers:</h3><pre>';
+                headerInfo += `Access-Control-Allow-Origin: ${corsOrigin || '❌ MISSING'}\n`;
+                headerInfo += `Access-Control-Allow-Methods: ${corsMethods || '❌ MISSING'}\n`;
+                headerInfo += `Access-Control-Allow-Headers: ${corsHeaders || '❌ MISSING'}\n`;
+                headerInfo += '</pre>';
+
+                if (corsOrigin && corsMethods && corsHeaders) {
+                    addResult('✅ CORS headers are present!', 'success');
+                    addResult(headerInfo, 'success');
+                } else {
+                    addResult('❌ CORS headers are MISSING or incomplete!', 'error');
+                    addResult(headerInfo, 'error');
+                    addResult('<strong>Solution:</strong><br>1. Make sure you edited icecast.xml correctly<br>2. Restart Icecast<br>3. Check the file location and syntax', 'error');
+                }
+
+                // Try to parse JSON
+                try {
+                    const data = await response.json();
+                    addResult('<h3>Stream Data:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>', 'info');
+                } catch (e) {
+                    addResult('Note: Response is not valid JSON', 'info');
+                }
+
+            } catch (err) {
+                addResult(`❌ Fetch failed: ${err.message}`, 'error');
+                
+                if (err.message.includes('CORS') || err.message.includes('Failed to fetch')) {
+                    addResult('<strong>This is a CORS error!</strong><br>Icecast is not sending CORS headers. Make sure:<br>1. You added the headers to icecast.xml<br>2. You restarted Icecast<br>3. The headers are in the correct location', 'error');
+                }
+            }
+        }
+
+        async function testFetch() {
+            clearResults();
+            const ngrokUrl = document.getElementById('ngrokUrl').value.trim();
+            
+            if (!ngrokUrl) {
+                addResult('Please enter your ngrok URL', 'error');
+                return;
+            }
+
+            const statusUrl = `${ngrokUrl}/status-json.xsl`;
+            addResult(`Testing fetch from: ${window.location.origin}`, 'info');
+            addResult(`To: ${statusUrl}`, 'info');
+
+            try {
+                const response = await fetch(statusUrl + '?nocache=' + Date.now(), {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+
+                if (!response.ok) {
+                    addResult(`❌ Response not OK: ${response.status}`, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+                addResult('✅ Fetch succeeded! CORS is working!', 'success');
+                addResult('<h3>Track Info:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>', 'info');
+
+            } catch (err) {
+                addResult(`❌ Fetch failed: ${err.message}`, 'error');
+                
+                if (err.message.includes('CORS') || err.message.includes('Failed to fetch')) {
+                    addResult('<strong>CORS Error Detected!</strong><br><br>Icecast is not sending CORS headers correctly.<br><br><strong>Fix:</strong><br>1. Open icecast.xml<br>2. Add the http-headers section (see EASIEST_CORS_SETUP.md)<br>3. Restart Icecast<br>4. Test again', 'error');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+

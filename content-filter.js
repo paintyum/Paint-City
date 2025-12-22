@@ -88,3 +88,57 @@ export function censorSlurs(text) {
   return censored;
 }
 
+// Check if text contains URLs/links - comprehensive detection
+export function containsLink(text) {
+  if (!text || typeof text !== 'string') return false;
+  
+  // Normalize text for better detection (remove common obfuscation)
+  const normalized = text.toLowerCase()
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .replace(/[\[\](){}]/g, ''); // Remove brackets that might hide URLs
+  
+  // Comprehensive URL patterns - catch various formats and obfuscations
+  const urlPatterns = [
+    /https?:\/\/[^\s]+/gi,                    // http:// or https://
+    /www\.[^\s]+/gi,                          // www.example.com
+    /[a-zA-Z0-9-]+\.[a-zA-Z]{2,}[^\s]*/gi,    // domain.com or domain.com/path
+    /[a-zA-Z0-9-]+\.(com|net|org|io|co|uk|us|ca|au|de|fr|jp|cn|ru|br|in|it|es|nl|pl|se|no|dk|fi|be|at|ch|cz|ie|pt|gr|tr|kr|mx|ar|za|nz|sg|my|th|ph|id|vn|tw|hk)[^\s]*/gi, // Common TLDs
+    /bit\.ly\/[^\s]+/gi,                      // bit.ly short links
+    /tinyurl\.com\/[^\s]+/gi,                 // tinyurl.com short links
+    /t\.co\/[^\s]+/gi,                        // Twitter short links
+    /goo\.gl\/[^\s]+/gi,                      // Google short links
+    /youtu\.be\/[^\s]+/gi,                    // YouTube short links
+    /youtube\.com\/[^\s]+/gi,                 // YouTube links
+    /discord\.gg\/[^\s]+/gi,                  // Discord invites
+    /discord\.com\/[^\s]+/gi,                  // Discord links
+    /steamcommunity\.com\/[^\s]+/gi,          // Steam links
+    /reddit\.com\/[^\s]+/gi,                  // Reddit links
+    /github\.com\/[^\s]+/gi,                   // GitHub links
+    /[a-zA-Z0-9-]+\[\.\][a-zA-Z]{2,}/gi,      // domain[.]com obfuscation
+    /[a-zA-Z0-9-]+\(\.\)[a-zA-Z]{2,}/gi,      // domain(.)com obfuscation
+    /[a-zA-Z0-9-]+\s*\.\s*[a-zA-Z]{2,}/gi,    // domain . com (spaces)
+    /[a-zA-Z0-9-]+dot[a-zA-Z]{2,}/gi,          // domaindotcom
+    /[a-zA-Z0-9-]+\[dot\][a-zA-Z]{2,}/gi,      // domain[dot]com
+  ];
+  
+  for (const pattern of urlPatterns) {
+    if (pattern.test(text) || pattern.test(normalized)) {
+      return true;
+    }
+  }
+  
+  // Check for IP addresses (potential URLs)
+  const ipPattern = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/gi;
+  if (ipPattern.test(text)) {
+    return true;
+  }
+  
+  // Check for common URL schemes
+  const schemePattern = /(ftp|file|mailto|tel|sms|data):/gi;
+  if (schemePattern.test(text)) {
+    return true;
+  }
+  
+  return false;
+}
+

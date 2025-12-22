@@ -62,9 +62,26 @@ echo Using: %NGROK_PATH%
 echo.
 echo NOTE: The warning page bypass is handled automatically by the website code.
 echo.
-REM ngrok v3 uses LOCALAPPDATA by default, so we don't need to specify config
-REM It will automatically use: %LOCALAPPDATA%\ngrok\ngrok.yml
-%NGROK_PATH% http 8000
+
+REM Check if config file exists in LOCALAPPDATA
+if exist "%LOCALAPPDATA%\ngrok\ngrok.yml" (
+    echo Found ngrok config file, using it for CORS headers...
+    echo Config location: %LOCALAPPDATA%\ngrok\ngrok.yml
+    echo.
+    %NGROK_PATH% http 8000 --config %LOCALAPPDATA%\ngrok\ngrok.yml
+) else (
+    echo WARNING: No ngrok config file found at: %LOCALAPPDATA%\ngrok\ngrok.yml
+    echo Starting ngrok without config (CORS headers won't work unless configured in Icecast)
+    echo.
+    echo To enable CORS via ngrok (requires paid plan):
+    echo 1. Copy ngrok.yml from this folder to: %LOCALAPPDATA%\ngrok\ngrok.yml
+    echo 2. Edit it with your settings
+    echo 3. Restart ngrok
+    echo.
+    echo OR configure CORS in Icecast (works with free ngrok) - see CORS_SETUP_INSTRUCTIONS.md
+    echo.
+    %NGROK_PATH% http 8000
+)
 
 pause
 

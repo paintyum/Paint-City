@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple CORS Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        button {
+            background: #0066cc;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        pre {
+            background: #000;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .success { color: #4caf50; }
+        .error { color: #f44336; }
+    </style>
+</head>
+<body>
+    <h1>Test CORS from Your Website</h1>
+    <p>This tests if your website can fetch track info from the ngrok URL.</p>
+    
+    <button onclick="testFetch()">Test Fetch Now</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function testFetch() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            const statusUrl = 'https://kam-budless-gael.ngrok-free.dev/status-json.xsl';
+            
+            try {
+                console.log('Testing fetch from:', window.location.origin);
+                console.log('To:', statusUrl);
+                
+                const response = await fetch(statusUrl + '?nocache=' + Date.now(), {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h2 class="success">✅ SUCCESS! CORS is working!</h2>
+                    <p>Track info data received:</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                console.log('✅ Data received:', data);
+                
+            } catch (err) {
+                resultDiv.innerHTML = `
+                    <h2 class="error">❌ FAILED: ${err.message}</h2>
+                    <p>Check the browser console (F12) for details.</p>
+                `;
+                console.error('❌ Fetch failed:', err);
+            }
+        }
+        
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            setTimeout(testFetch, 1000);
+        });
+    </script>
+</body>
+</html>
+

@@ -51,7 +51,8 @@
       '/interviews': '/interviews.html',
       '/settings': '/settings.html',
       '/login': '/login.html',
-      '/chat': '/chat.html'
+      '/chat': '/chat.html',
+      '/shop': '/shop.html'
     };
     
     // Convert all links with clean URLs to .html files
@@ -84,7 +85,8 @@
           '/interviews': '/interviews.html',
           '/settings': '/settings.html',
           '/login': '/login.html',
-          '/chat': '/chat.html'
+          '/chat': '/chat.html',
+          '/shop': '/shop.html'
         };
         
         if (routes[url.pathname]) {
