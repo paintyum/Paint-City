@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="favicon.png">
   <link rel="stylesheet" href="style.css">
   <!-- Security Headers -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; font-src 'self' data:; connect-src 'self' https://www.googleapis.com https://*.googleapis.com https://*.firebaseio.com https://*.firebase.com wss://*.firebaseio.com https://kam-budless-gael.ngrok-free.dev; frame-src https://www.youtube.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; font-src 'self' data:; connect-src 'self' https://www.googleapis.com https://*.googleapis.com https://*.firebaseio.com https://*.firebase.com wss://*.firebaseio.com https://kam-budless-gael.ngrok-free.dev; media-src 'self' https://kam-budless-gael.ngrok-free.dev https://*.ngrok-free.dev http://localhost:8000 http://127.0.0.1:8000; frame-src https://www.youtube.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -246,16 +246,26 @@
       try {
         const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
         const { db } = await import('./firebase.js');
+        console.log('🔍 Checking Firebase for ngrok URL...');
         const configDoc = await getDoc(doc(db, 'config', 'radio'));
         if (configDoc.exists()) {
           const data = configDoc.data();
+          console.log('📄 Firebase config/radio document found:', data);
           if (data.ngrokUrl) {
-            console.log('Got ngrok URL from Firebase:', data.ngrokUrl);
+            console.log('✅ Got ngrok URL from Firebase:', data.ngrokUrl);
             return data.ngrokUrl;
+          } else {
+            console.warn('⚠️ Firebase config/radio exists but ngrokUrl field is missing');
+            console.warn('📝 Available fields:', Object.keys(data));
           }
+        } else {
+          console.warn('⚠️ Firebase config/radio document does not exist');
+          console.warn('📝 Create it at: Firestore → config collection → radio document');
+          console.warn('📝 Add field: ngrokUrl (string) = "https://kam-budless-gael.ngrok-free.dev"');
         }
       } catch (err) {
-        console.log('Could not get ngrok URL from Firebase:', err.message);
+        console.error('❌ Error getting ngrok URL from Firebase:', err);
+        console.error('❌ Error details:', err.message, err.stack);
       }
       return null;
     }
@@ -263,41 +273,81 @@
     // If site is HTTPS, we MUST use HTTPS stream (ngrok)
     const isHttpsSite = window.location.protocol === 'https:';
     
+    // Function to set stream URL and update audio
+    function setStreamUrl(url) {
+      RADIO_HOST = url.replace('https://', '').replace('http://', '');
+      RADIO_PORT = '';
+      USE_HTTPS = url.startsWith('https://');
+      STREAM_URL = `${USE_HTTPS ? 'https' : 'http'}://${RADIO_HOST}/stream`;
+      STATUS_URL = `${USE_HTTPS ? 'https' : 'http'}://${RADIO_HOST}/status-json.xsl`;
+      
+      // Update audio source
+      audio.src = STREAM_URL;
+      window.STREAM_URL = STREAM_URL;
+      window.STATUS_URL = STATUS_URL;
+      
+      console.log('🎵 Stream URL set to:', STREAM_URL);
+      console.log('🎵 Audio src set to:', audio.src);
+      
+      // Reload audio to use new source
+      audio.load();
+    }
+    
     // Try to detect ngrok first, then fall back to Firebase, then local network
     detectNgrokUrl().then(async (ngrokFound) => {
+      console.log('🔍 ngrok detection result:', ngrokFound);
+      
       if (!ngrokFound) {
         // Try to get from Firebase
+        console.log('🔍 ngrok not auto-detected, checking Firebase...');
         const firebaseNgrokUrl = await getNgrokUrlFromFirebase();
         
         if (firebaseNgrokUrl) {
           // Use ngrok URL from Firebase
-          RADIO_HOST = firebaseNgrokUrl.replace('https://', '').replace('http://', '');
-          RADIO_PORT = '';
-          USE_HTTPS = firebaseNgrokUrl.startsWith('https://');
-          STREAM_URL = `${USE_HTTPS ? 'https' : 'http'}://${RADIO_HOST}/stream`;
-          STATUS_URL = `${USE_HTTPS ? 'https' : 'http'}://${RADIO_HOST}/status-json.xsl`;
-          const streamUrl = window.STREAM_URL || STREAM_URL;
-          audio.src = streamUrl;
-          window.STREAM_URL = STREAM_URL;
-          window.STATUS_URL = STATUS_URL;
-          console.log('Using ngrok URL from Firebase:', STREAM_URL);
+          setStreamUrl(firebaseNgrokUrl);
+          console.log('✅ Using ngrok URL from Firebase:', STREAM_URL);
         } else if (isHttpsSite) {
           // HTTPS site needs HTTPS stream - warn user
-          console.error('ERROR: HTTPS site requires ngrok URL. Please set it in Firebase config/radio document.');
+          console.error('❌ ERROR: HTTPS site requires ngrok URL. Please set it in Firebase config/radio document.');
+          console.error('📝 To fix: Go to Firebase Console → Firestore → Create document at: config/radio');
+          console.error('📝 Add field: ngrokUrl = "https://kam-budless-gael.ngrok-free.dev"');
+          console.error('📝 Current site protocol:', window.location.protocol);
+          console.error('📝 Current site URL:', window.location.href);
+          
+          // Show error message to user
+          const statusEl = document.getElementById('playerStatus');
+          if (statusEl) {
+            statusEl.innerHTML = '⚫ CONFIG ERROR';
+          }
+          const trackEl = document.querySelector('.player-track');
+          if (trackEl) {
+            trackEl.textContent = 'Stream URL not configured - check console';
+          }
         } else {
           // Use local network (only works on HTTP sites or localhost)
           const PROTOCOL = USE_HTTPS ? 'https' : 'http';
           const PORT_STRING = RADIO_PORT ? `:${RADIO_PORT}` : '';
           STREAM_URL = `${PROTOCOL}://${RADIO_HOST}${PORT_STRING}/stream`;
           STATUS_URL = `${PROTOCOL}://${RADIO_HOST}${PORT_STRING}/status-json.xsl`;
-          const streamUrl = window.STREAM_URL || STREAM_URL;
-          audio.src = streamUrl;
+          audio.src = STREAM_URL;
           window.STREAM_URL = STREAM_URL;
           window.STATUS_URL = STATUS_URL;
-          console.log('Radio server URL (local network):', STREAM_URL);
+          console.log('📻 Radio server URL (local network):', STREAM_URL);
         }
+      } else {
+        console.log('✅ ngrok auto-detected and configured');
       }
     });
+    
+    // Also try Firebase immediately (in case ngrok detection takes time)
+    if (isHttpsSite) {
+      getNgrokUrlFromFirebase().then((firebaseNgrokUrl) => {
+        if (firebaseNgrokUrl && (!window.STREAM_URL || !window.STREAM_URL.includes('ngrok'))) {
+          console.log('🔄 Updating stream URL from Firebase (secondary check)');
+          setStreamUrl(firebaseNgrokUrl);
+        }
+      });
+    }
     
     // Set initial URLs (will be updated if ngrok is found)
     const PROTOCOL = USE_HTTPS ? 'https' : 'http';
@@ -611,15 +661,43 @@
     });
 
     audio.addEventListener('error', function(e) {
-      console.error('Stream error:', e);
+      console.error('❌ Stream error:', e);
+      console.error('❌ Audio error code:', audio.error ? audio.error.code : 'unknown');
+      console.error('❌ Audio error message:', audio.error ? audio.error.message : 'unknown');
+      console.error('❌ Current audio src:', audio.src);
+      console.error('❌ Expected STREAM_URL:', window.STREAM_URL || STREAM_URL);
+      
       streamIsLive = false;
       isPlaying = false;
       const statusEl = document.getElementById('playerStatus');
       if (statusEl) statusEl.innerHTML = '⚫ OFFLINE';
       const trackEl = document.querySelector('.player-track');
-      if (trackEl) trackEl.textContent = 'Stream error';
+      if (trackEl) {
+        if (audio.error) {
+          const errorMsg = audio.error.code === 4 ? 'Stream URL not found - check ngrok/Firebase config' : 
+                          audio.error.code === 2 ? 'Network error - check stream is running' :
+                          'Stream error - check console';
+          trackEl.textContent = errorMsg;
+        } else {
+          trackEl.textContent = 'Stream error - check console';
+        }
+      }
       if (playBtn) playBtn.innerHTML = '▶';
     });
+    
+    // Function to refresh stream URL from Firebase
+    window.refreshStreamUrl = async function() {
+      console.log('🔄 Manually refreshing stream URL from Firebase...');
+      const firebaseNgrokUrl = await getNgrokUrlFromFirebase();
+      if (firebaseNgrokUrl) {
+        setStreamUrl(firebaseNgrokUrl);
+        console.log('✅ Stream URL refreshed:', STREAM_URL);
+        return true;
+      } else {
+        console.error('❌ Could not refresh stream URL - Firebase config not found');
+        return false;
+      }
+    };
     
     function togglePlay() {
       if (isPlaying) {
@@ -631,10 +709,15 @@
       } else {
         const streamUrl = window.STREAM_URL || STREAM_URL;
         
+        console.log('▶ Play button clicked');
+        console.log('🎵 Current audio.src:', audio.src);
+        console.log('🎵 Expected STREAM_URL:', streamUrl);
+        
         // Set audio source - HTML5 audio can play streams even with CORS issues
         if (!audio.src || audio.src !== streamUrl) {
+          console.log('🔄 Updating audio source to:', streamUrl);
           audio.src = streamUrl;
-          console.log('Setting audio source:', streamUrl);
+          audio.load(); // Reload to use new source
         }
         
         // Try to play - audio element works even with CORS errors
@@ -648,7 +731,7 @@
             isPlaying = true;
             if (playBtn) playBtn.innerHTML = '⏸';
             if (statusEl) statusEl.innerHTML = '● LIVE';
-            console.log('Playback started successfully');
+            console.log('✅ Playback started successfully');
             // Clear "Waiting for stream..." and fetch track info immediately
             const trackEl = document.querySelector('.player-track');
             if (trackEl && trackEl.textContent === 'Waiting for stream...') {
@@ -657,28 +740,40 @@
             // Fetch track info immediately when play succeeds
             setTimeout(() => fetchTrackInfo(), 500);
           }).catch(err => {
-            console.error('Play failed:', err);
+            console.error('❌ Play failed:', err);
+            console.error('❌ Error code:', audio.error ? audio.error.code : 'unknown');
+            console.error('❌ Error message:', audio.error ? audio.error.message : 'unknown');
             streamIsLive = false;
             isPlaying = false;
             if (statusEl) statusEl.innerHTML = '⚫ OFFLINE';
             const trackEl = document.querySelector('.player-track');
-            if (trackEl) trackEl.textContent = 'Stream offline';
+            if (trackEl) {
+              trackEl.textContent = 'Stream offline - check console for details';
+            }
             
-            // Try loading and playing again after a short delay
-            setTimeout(() => {
-              audio.load();
-              audio.play().then(() => {
-                playBtn.innerHTML = '⏸';
-                streamIsLive = true;
-                document.getElementById('playerStatus').innerHTML = '● LIVE';
-                isPlaying = true;
-              }).catch(err2 => {
-                console.error('Retry play also failed:', err2);
-                document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
-                streamIsLive = false;
-                alert('Unable to connect to stream. Make sure the stream is live.');
-              });
-            }, 2000);
+            // Try refreshing URL from Firebase and retry
+            console.log('🔄 Attempting to refresh stream URL and retry...');
+            window.refreshStreamUrl().then((refreshed) => {
+              if (refreshed) {
+                setTimeout(() => {
+                  audio.load();
+                  audio.play().then(() => {
+                    playBtn.innerHTML = '⏸';
+                    streamIsLive = true;
+                    document.getElementById('playerStatus').innerHTML = '● LIVE';
+                    isPlaying = true;
+                    console.log('✅ Retry after refresh succeeded');
+                  }).catch(err2 => {
+                    console.error('❌ Retry play also failed:', err2);
+                    document.getElementById('playerStatus').innerHTML = '⚫ OFFLINE';
+                    streamIsLive = false;
+                    alert('Unable to connect to stream. Check:\n1. ngrok is running\n2. Firebase config/radio has ngrokUrl\n3. Stream server is running on port 8000');
+                  });
+                }, 1000);
+              } else {
+                alert('Unable to connect to stream. Check:\n1. Firebase config/radio document exists\n2. ngrokUrl field is set to: https://kam-budless-gael.ngrok-free.dev\n3. Stream server is running');
+              }
+            });
           });
         }
       }
