@@ -565,6 +565,26 @@ h2{
   vertical-align: middle;
 }
 
+.social-links {
+  text-align: center;
+  padding: 10px 0;
+  width: 100%;
+  display: block;
+}
+
+.social-links a {
+  color: #00ffff;
+  text-decoration: underline;
+  margin: 0 15px;
+  display: inline-block;
+  font-size: 14px;
+  transition: text-shadow 0.3s ease;
+}
+
+.social-links a:hover {
+  text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+}
+
 .radio-chat-wrapper {
   position: absolute !important;
   width: 500px;

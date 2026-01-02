@@ -26,6 +26,10 @@
         </div>
         <img src="https://media1.tenor.com/m/-v0gLfm3FtEAAAAd/chuzzle-raptisoft.gif" alt="chuzzle" class="chuzzle-right">
       </div>
+      <div class="social-links">
+        <a href="https://bandcamp.com/paintyum" target="_blank">Bandcamp</a>
+        <a href="https://www.last.fm/user/Paintyum" target="_blank">Last.fm</a>
+      </div>
     </div>
 
     <div class="nav-center">
@@ -87,23 +91,40 @@
     </div>
     
     <div class="player-content" id="playerContent">
-      <div class="player-display">
-        <div class="player-time" id="playerStatus">⚫ OFFLINE</div>
-        <div class="player-station">PAINTYUM RADIO</div>
-        <div class="player-track">Waiting for stream...</div>
+      <!-- Video Stream Player (shown when live) -->
+      <div id="videoPlayerContainer" style="display: none;">
+        <div class="player-header" style="margin: -10px -10px 10px -10px; padding: 5px 10px;">
+          <div class="player-title">🔴 LIVE STREAM</div>
+        </div>
+        <video id="videoStream" autoplay muted playsinline style="width: 100%; max-height: 400px; background: #000;">
+          Your browser does not support the video tag.
+        </video>
+        <div style="padding: 10px; text-align: center;">
+          <button onclick="toggleVideoMute()" id="videoMuteBtn" style="padding: 5px 15px; margin: 5px;">🔊 Unmute</button>
+          <button onclick="stopVideoStream()" style="padding: 5px 15px; margin: 5px; background: #cc0000;">Stop</button>
+        </div>
       </div>
       
-      <div class="player-buttons">
-        <button onclick="previousTrack()" title="Previous">⏮</button>
-        <button onclick="togglePlay()" id="playBtn" title="Play">▶</button>
-        <button onclick="stopStream()" title="Stop">⏹</button>
-        <button onclick="nextTrack()" title="Next">⏭</button>
-      </div>
-      
-      <div class="volume-control">
-        <span>Volume</span>
-        <input type="range" min="0" max="100" value="80" id="volumeSlider" onchange="changeVolume(this.value)">
-        <span id="volumeDisplay">80</span>
+      <!-- Radio Player (shown when video is offline) -->
+      <div id="radioPlayerContainer">
+        <div class="player-display">
+          <div class="player-time" id="playerStatus">⚫ OFFLINE</div>
+          <div class="player-station">PAINTYUM RADIO</div>
+          <div class="player-track">Waiting for stream...</div>
+        </div>
+        
+        <div class="player-buttons">
+          <button onclick="previousTrack()" title="Previous">⏮</button>
+          <button onclick="togglePlay()" id="playBtn" title="Play">▶</button>
+          <button onclick="stopStream()" title="Stop">⏹</button>
+          <button onclick="nextTrack()" title="Next">⏭</button>
+        </div>
+        
+        <div class="volume-control">
+          <span>Volume</span>
+          <input type="range" min="0" max="100" value="80" id="volumeSlider" onchange="changeVolume(this.value)">
+          <span id="volumeDisplay">80</span>
+        </div>
       </div>
     </div>
     </div>
@@ -268,6 +289,163 @@
         console.error('❌ Error details:', err.message, err.stack);
       }
       return null;
+    }
+    
+    // Get video stream URL from Firebase
+    async function getVideoStreamUrlFromFirebase() {
+      try {
+        const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+        const { db } = await import('./firebase.js');
+        const configDoc = await getDoc(doc(db, 'config', 'radio'));
+        if (configDoc.exists()) {
+          const data = configDoc.data();
+          if (data.videoStreamUrl) {
+            console.log('✅ Got video stream URL from Firebase:', data.videoStreamUrl);
+            return data.videoStreamUrl;
+          }
+        }
+      } catch (err) {
+        console.error('❌ Error getting video stream URL from Firebase:', err);
+      }
+      return null;
+    }
+    
+    // Check if video stream is live
+    async function checkVideoStreamStatus(videoUrl) {
+      if (!videoUrl) return false;
+      
+      try {
+        // Try to fetch the HLS playlist
+        const response = await fetch(videoUrl + '?nocache=' + Date.now(), {
+          method: 'HEAD',
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+        
+        if (response.ok) {
+          console.log('✅ Video stream is live:', videoUrl);
+          return true;
+        }
+      } catch (err) {
+        // If HEAD fails, try using video element to check
+        return new Promise((resolve) => {
+          const testVideo = document.createElement('video');
+          testVideo.src = videoUrl;
+          testVideo.muted = true;
+          
+          const timeout = setTimeout(() => {
+            testVideo.remove();
+            resolve(false);
+          }, 3000);
+          
+          testVideo.addEventListener('loadedmetadata', () => {
+            clearTimeout(timeout);
+            testVideo.remove();
+            resolve(true);
+          });
+          
+          testVideo.addEventListener('error', () => {
+            clearTimeout(timeout);
+            testVideo.remove();
+            resolve(false);
+          });
+          
+          testVideo.load();
+        });
+      }
+      
+      return false;
+    }
+    
+    // Switch between video and radio
+    let videoStreamUrl = null;
+    let isVideoLive = false;
+    let videoCheckInterval = null;
+    
+    async function updateStreamDisplay() {
+      const videoContainer = document.getElementById('videoPlayerContainer');
+      const radioContainer = document.getElementById('radioPlayerContainer');
+      const videoElement = document.getElementById('videoStream');
+      
+      if (!videoContainer || !radioContainer || !videoElement) return;
+      
+      // Get video stream URL from Firebase
+      if (!videoStreamUrl) {
+        videoStreamUrl = await getVideoStreamUrlFromFirebase();
+      }
+      
+      if (videoStreamUrl) {
+        // Check if video stream is live
+        const videoIsLive = await checkVideoStreamStatus(videoStreamUrl);
+        
+        if (videoIsLive && !isVideoLive) {
+          // Video just went live - switch to video
+          console.log('🎥 Switching to video stream');
+          isVideoLive = true;
+          videoContainer.style.display = 'block';
+          radioContainer.style.display = 'none';
+          
+          // Set video source
+          if (videoElement.src !== videoStreamUrl) {
+            videoElement.src = videoStreamUrl;
+            videoElement.load();
+            videoElement.play().catch(err => {
+              console.error('Error playing video:', err);
+            });
+          }
+          
+          // Pause radio if playing
+          if (isPlaying) {
+            audio.pause();
+            isPlaying = false;
+            const playBtn = document.getElementById('playBtn');
+            if (playBtn) playBtn.innerHTML = '▶';
+          }
+        } else if (!videoIsLive && isVideoLive) {
+          // Video just went offline - switch back to radio
+          console.log('📻 Switching back to radio');
+          isVideoLive = false;
+          videoContainer.style.display = 'none';
+          radioContainer.style.display = 'block';
+          
+          // Stop video
+          videoElement.pause();
+          videoElement.src = '';
+        }
+      } else {
+        // No video stream URL configured - show radio
+        if (isVideoLive) {
+          isVideoLive = false;
+          videoContainer.style.display = 'none';
+          radioContainer.style.display = 'block';
+          videoElement.pause();
+          videoElement.src = '';
+        }
+      }
+    }
+    
+    // Video control functions
+    let isVideoMuted = true;
+    function toggleVideoMute() {
+      const videoElement = document.getElementById('videoStream');
+      const muteBtn = document.getElementById('videoMuteBtn');
+      if (videoElement) {
+        isVideoMuted = !isVideoMuted;
+        videoElement.muted = isVideoMuted;
+        if (muteBtn) {
+          muteBtn.textContent = isVideoMuted ? '🔊 Unmute' : '🔇 Mute';
+        }
+      }
+    }
+    
+    function stopVideoStream() {
+      const videoElement = document.getElementById('videoStream');
+      if (videoElement) {
+        videoElement.pause();
+        videoElement.src = '';
+      }
+      isVideoLive = false;
+      updateStreamDisplay();
     }
     
     // If site is HTTPS, we MUST use HTTPS stream (ngrok)
@@ -619,6 +797,13 @@
         fetchTrackInfo();
       }
     }, 2000);
+    
+    // Start checking video stream status every 5 seconds
+    if (!videoCheckInterval) {
+      videoCheckInterval = setInterval(updateStreamDisplay, 5000);
+      // Check immediately
+      updateStreamDisplay();
+    }
     
     checkStreamStatus();
     
